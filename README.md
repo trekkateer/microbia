@@ -50,6 +50,11 @@ Choose a species. Steer your cells with the mouse, WASD or arrow keys. Mouse ste
 
 ### Reproduction
 
+Division now has a 1.2-second membrane animation: a daughter forms gradually,
+the cells ease apart, and the connecting neck narrows and separates. Organelles
+scale with each cell. The visual runs for players and AI in local and multiplayer
+ponds; authoritative biomass, nutrition and collisions still split immediately.
+
 | Species | Minimum fraction of maximum biomass | Mass needed per cell |
 | --- | --- | --- |
 | Euglena | 30% | 48 |

@@ -14,6 +14,7 @@ import { AbsorptionPulses } from './absorption-pulses';
 import { EngulfAnimations } from './engulf-animation';
 import type { EngulfVisual } from './engulf-animation';
 import { pseudopodGeometry } from './pseudopods';
+import { DivisionAnimations } from './division-animation';
 
 function membrane(graphics: Graphics, radius: number, time: number, stretch: number, shape: SpeciesDefinition['visual']['shape']): void {
   graphics.poly(membraneContour(radius, time, stretch, shape).flatMap(p => [p.x, p.y]), true);
@@ -40,8 +41,11 @@ export class PondRenderer {
   private targetGraphics = new Map<string, { cell: Container; body: Graphics; interior: Graphics; label: Text; drawnTick: number; wasEngulfing: boolean }>();
   private effects = new Graphics();
   private currents = new Graphics();
+  private divisionMembranes = new Graphics();
+  private divisionAnimations: DivisionAnimations;
 
   constructor(private app: Application, private arena: ArenaDefinition, private species: SpeciesDefinition, private nutrition: NutritionDefinitions, initial: WorldSnapshot) {
+    this.divisionAnimations = new DivisionAnimations(initial);
     this.app.stage.addChild(this.scene);
     this.createWater();
     this.createZones();
@@ -60,7 +64,7 @@ export class PondRenderer {
       this.nutrientSprites.push(sprite);
       this.scene.addChild(sprite);
     }
-    this.scene.addChild(this.targets, this.pulse, this.cell, this.engulfLayer, this.effects);
+    this.scene.addChild(this.divisionMembranes, this.targets, this.pulse, this.cell, this.engulfLayer, this.effects);
     this.cell.addChild(this.body, this.organelles, this.cilia);
     for (const entry of Object.values(roster)) {
       const detail = new Graphics();
@@ -124,6 +128,28 @@ export class PondRenderer {
   }
 
   render(previous: WorldSnapshot, current: WorldSnapshot, alpha: number, camera: Camera, delta: number): void {
+    current = this.divisionAnimations.update(current, alpha, delta);
+    const dividing = this.divisionAnimations.activeIds;
+    if (dividing.size) {
+      const visible = new Map([current.player, ...current.organisms].map(p => [p.id, p]));
+      previous = { ...previous, player: dividing.has(previous.player.id) ? visible.get(previous.player.id)! : previous.player,
+        organisms: previous.organisms.map(p => dividing.has(p.id) ? visible.get(p.id)! : p) };
+    }
+    this.divisionMembranes.clear();
+    for (const { a, b, width } of this.divisionAnimations.necks) {
+      if (width < 0.1) continue;
+      const colors = roster[a.speciesId].visual;
+      const dx = b.x - a.x, dy = b.y - a.y, length = Math.hypot(dx, dy) || 1;
+      const nx = -dy / length, ny = dx / length;
+      const ax = a.x + dx * 0.25, ay = a.y + dy * 0.25;
+      const bx = b.x - dx * 0.25, by = b.y - dy * 0.25;
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      this.divisionMembranes.moveTo(ax + nx * width, ay + ny * width)
+        .quadraticCurveTo(mx, my, bx + nx * width, by + ny * width)
+        .lineTo(bx - nx * width, by - ny * width)
+        .quadraticCurveTo(mx, my, ax - nx * width, ay - ny * width).closePath()
+        .fill({ color: colors.body, alpha: 0.26 }).stroke({ color: colors.membrane, alpha: 0.65, width: 1.5 });
+    }
     this.time += delta;
     this.currents.clear();
     for (const zone of this.arena.zones) if (zone.effectId === 'current') {
@@ -212,7 +238,7 @@ export class PondRenderer {
       // Ordinary membranes/cilia deform at the simulation cadence. Position and
       // rotation still interpolate every frame; captures keep full-frame curves.
       // This avoids rebuilding and triangulating the same body between ticks.
-      if (engulf || visual.wasEngulfing || visual.drawnTick !== current.tick) {
+      if (engulf || dividing.has(target.id) || visual.wasEngulfing || visual.drawnTick !== current.tick) {
         visual.body.clear();
         if (engulf) this.drawEngulf(visual.body, targetRadius, rotation, mix(old.stretch, target.stretch), membraneTime, colors, engulf);
         else {

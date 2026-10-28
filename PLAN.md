@@ -223,6 +223,13 @@ The HUD displays the least-fed owned cell and starving-cell counts. Low hunger (
 
 ## Public hosting preparation
 
+Division presentation follow-up: added a 1.2-second client animation that observes
+authoritative births, grows the daughter membrane and organelles, eases both cells
+apart and pinches off a membrane neck. Death and generation changes cancel the
+visual. Existing colonies do not replay births on join. Added parent IDs to compact
+public actor packets so rival and AI divisions animate as well as owned divisions.
+Simulation timing, resource conservation and collision rules are unchanged.
+
 Added `render.yaml` for a single Node web service serving both the built client and
 authoritative simulation, pinned Node 26.10.0, production dependency installation
 including build tools, `/healthz`, and SIGTERM/SIGINT shutdown handling. SSE responses
