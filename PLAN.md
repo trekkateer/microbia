@@ -258,3 +258,6 @@ have been changed.
 
 User requested outward knockback instead of self-reversal. Paramecium now uses a discharge effect that preserves ordinary steering and heading, pushes nearby rival cells radially once, excludes allies and retains species defenses and capture interruption. Costs, range, duration and cooldown are unchanged. All 155 tests and both production builds pass.
 
+
+Latency verification: 157 unit tests, both production builds, and the real local WebSocket/HTTP transport integration check pass. Deployed commit 763f08f. A 35-snapshot probe through www.microbia.us measured median acknowledgment RTT 29ms, median snapshot gap 67ms, maximum gap 164ms and effective simulation rate 29Hz; the sampled server step was 2.36ms. These are brief measurements from this environment through its configured proxy, not a guarantee for every player or crowded pond. Paid hosting remains unchanged.
+
