@@ -1,0 +1,10 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.log
+.env
+.env.*
+
+dist-server/
+.test-temp/

@@ -1,0 +1,18 @@
+# Single process: rooms and sessions are held in memory.
+services:
+  - type: web
+    name: microbia-gg
+    runtime: node
+    plan: free
+    region: ohio
+    numInstances: 1
+    buildCommand: npm ci --include=dev && npm run build:prototype
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 26.10.0
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0

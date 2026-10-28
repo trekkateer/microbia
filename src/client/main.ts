@@ -1,0 +1,77 @@
+import { Application } from 'pixi.js';
+import { arenas, species, organisms, validateDefinitions } from '../data';
+import { createWorld, snapshot } from '../sim/world';
+import { step } from '../sim/step';
+import { FixedStepClock } from '../sim/fixed-step';
+import { Camera } from './camera/camera';
+import { Input } from './input/input';
+import { PondRenderer } from './rendering/pond-renderer';
+import { createHud } from './ui/hud';
+import { nutrition } from '../data/nutrition';
+import './style.css';
+import { connectPond } from '../network/client';
+import { chooseSpecies } from './ui/selection';
+
+async function start(): Promise<void> {
+  const arena = arenas['pond-water'];
+  validateDefinitions(arena, organisms);
+  const organism = await chooseSpecies(document.querySelector<HTMLElement>('#app')!, arena, species);
+  const online = document.querySelector<HTMLInputElement>('#online-mode')?.checked;
+  const room = document.querySelector<HTMLInputElement>('#room-name')?.value || 'pond';
+  let network: Awaited<ReturnType<typeof connectPond>> | undefined;
+  if (online) {
+    try { network = await connectPond(organism.id, room); }
+    catch (error) { const notice = document.createElement('p'); notice.textContent = String(error) + ' — reload to try again or choose local play.'; document.querySelector('#app')!.append(notice); return; }
+  }
+  const hud = createHud(document.querySelector<HTMLElement>('#app')!, arena, organism, nutrition);
+  const app = new Application();
+  try {
+    await app.init({ resizeTo: hud.host, background: arena.theme.background, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl' });
+  } catch (error) {
+    hud.loading.textContent = 'The pond could not start. Enable hardware acceleration in your browser, then reload.';
+    throw error;
+  }
+  app.canvas.tabIndex = 0;
+  app.canvas.setAttribute('aria-label', 'Pond Water. Steer your cells with the mouse, WASD or arrow keys. Press Space for your species ability and R to divide when ready. The camera adjusts automatically.');
+  hud.host.appendChild(app.canvas);
+  const world = createWorld(arena, organism);
+  if (import.meta.env.DEV && import.meta.env.VITE_TEST_HOOKS === '1') window.__microbiaTest = { world };
+  let current = network?.state ?? snapshot(world);
+  let previous = current;
+  const camera = new Camera();
+  const renderer = new PondRenderer(app, arena, organism, nutrition, current);
+  const input = new Input(app.canvas);
+  hud.activate.addEventListener('click', () => { input.activate(); app.canvas.focus(); });
+  hud.reproduce.addEventListener('click', () => { input.reproduce(); app.canvas.focus(); });
+  hud.respawn.addEventListener('click', () => { input.respawn(); app.canvas.focus(); });
+  const clock = new FixedStepClock();
+  document.addEventListener('visibilitychange', () => { input.reset(); clock.reset(); previous = current; });
+  let skipNextFrame = false;
+  document.addEventListener('visibilitychange', () => { skipNextFrame = true; });
+  hud.loading.hidden = true;
+  const status = document.createElement('div');
+  if (network) { status.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:20;background:#102820;color:#e2efc8;padding:8px;pointer-events:none'; hud.host.append(status); }
+  let networkBlend = 0;
+  let lastHudTick = -1;
+  app.ticker.add(ticker => {
+    if (document.hidden) return;
+    const delta = skipNextFrame ? 0 : Math.min(ticker.elapsedMS / 1000, 0.25);
+    skipNextFrame = false;
+    const alpha = clock.advance(delta, () => {
+      if (!network) previous = current;
+      const command = input.read(camera);
+      if (network) { network.send(command); if (network.state.tick !== current.tick) { previous = current; current = network.state; networkBlend = 0; } }
+      else { step(world, command); current = snapshot(world); }
+      if (current.player.generation !== previous.player.generation || current.player.alive !== previous.player.alive) { previous = current; input.reset(); }
+    });
+    networkBlend += delta;
+    renderer.render(previous, current, network ? Math.min(1, networkBlend / (2 / 30)) : alpha, camera, delta);
+    if (network) { app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status; }
+    if (current.tick !== lastHudTick) {
+      hud.update(current.player, current.tick, current.organisms);
+      lastHudTick = current.tick;
+    }
+  });
+}
+
+start().catch(error => { console.error('Unable to start microbia.gg', error); });

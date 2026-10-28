@@ -1,0 +1,163 @@
+:root { font-family: 'Segoe UI', Arial, sans-serif; color: #173b38; background: #f2f1e9; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid #e9c889; outline-offset: 4px; }
+#app { height: 100dvh; min-height: 570px; padding: 0 24px; display: flex; flex-direction: column; }
+.site-header { height: 82px; flex-shrink: 0; display: flex; align-items: center; gap: 32px; }
+.brand { display: flex; align-items: center; color: #163a35; text-decoration: none; font-size: 29px; font-weight: 750; letter-spacing: -1.7px; }
+.brand-suffix { color: #7f9483; font-weight: 450; }
+.brand-cell { position: relative; width: 27px; height: 26px; margin-right: 11px; border: 1.5px solid #3b6150; background: #d9e3c8; border-radius: 43% 57% 66% 34% / 44% 33% 67% 56%; transform: rotate(-20deg); }
+.brand-cell::after { content: ''; width: 9px; height: 8px; position: absolute; left: 8px; top: 8px; border-radius: 50%; background: #6d8f74; }
+.header-note { color: #7e8a7d; font-family: Georgia, serif; font-style: italic; font-size: 15px; margin-left: 7px; }
+.build-tag { margin-left: auto; display: flex; align-items: center; gap: 9px; font-size: 10px; letter-spacing: 1.5px; color: #617564; }
+.build-tag > span { width: 5px; height: 5px; background: #74945e; border-radius: 50%; }
+.build-tag b { font-size: 9px; font-weight: 500; border: 1px solid #cdd4c4; padding: 5px 7px; border-radius: 4px; margin-left: 4px; }
+.viewport { flex: 1; min-height: 440px; position: relative; overflow: hidden; border-radius: 18px; isolation: isolate; background: #091e23; color: #e3ead9; box-shadow: 0 8px 28px #1838320d; }
+#game { position: absolute; inset: 0; }
+#game canvas { display: block; width: 100%; height: 100%; outline: none; }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 48%, transparent 20%, #06181a3d 65%, #030e14bd 100%); box-shadow: inset 0 0 70px #081f233b; }
+.overlay { position: absolute; z-index: 1; pointer-events: none; }
+.eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 2px; color: #90aca1; }
+.arena-heading { top: 32px; left: 34px; }
+.arena-heading .eyebrow { display: flex; align-items: center; gap: 8px; }
+.live-dot { width: 5px; height: 5px; border-radius: 50%; background: #b7c9a0; }
+h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 37px; line-height: 1.1; letter-spacing: -1.1px; margin: 13px 0 8px; }
+.arena-heading p { font-size: 12px; color: #8fa99d; margin: 0; }
+.species-card { left: 28px; bottom: 28px; width: 254px; padding: 21px 23px 15px; border: 1px solid #a4c7a426; border-radius: 12px; background: #0a2829b3; backdrop-filter: blur(14px); }
+h2 { font-family: Georgia, serif; font-weight: 400; font-style: italic; font-size: 24px; letter-spacing: -0.4px; margin: 12px 0 7px; }
+.species-card p { max-width: 185px; color: #a0b6a4; font-size: 11px; line-height: 1.7; margin: 0; }
+.species-foot { margin-top: 18px; border-top: 1px solid #b6d2a51a; padding-top: 12px; display: flex; align-items: center; gap: 7px; color: #9ab49e; font-size: 8px; letter-spacing: 1.5px; }
+.species-dot { width: 5px; height: 5px; border-radius: 50%; background: #b7d8a3; }
+.species-number { margin-left: auto; color: #6e9286; letter-spacing: 1px; }
+.growth-card { bottom: 28px; right: 28px; width: 228px; padding: 20px 22px; border: 1px solid #a4c7a426; border-radius: 12px; background: #0a2829b3; backdrop-filter: blur(14px); }
+.growth-card .eyebrow { display: flex; justify-content: space-between; font-size: 8px; }
+#growth-label { font-size: 7px; letter-spacing: 1px; color: #c7caa0; }
+.mass-line { display: flex; gap: 7px; align-items: baseline; margin-top: 13px; }
+#mass { font-family: Georgia, serif; font-size: 42px; line-height: 1; font-variant-numeric: tabular-nums; color: #e4e9d1; }
+.mass-line > span { color: #8eaa9a; font-size: 11px; }
+.eaten-count { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+#eaten { font-size: 16px; font-variant-numeric: tabular-nums; }
+.eaten-count small { font-size: 7px; letter-spacing: 1px; color: #799c8d; }
+.growth-track { height: 3px; background: #9ec49b1f; border-radius: 3px; overflow: hidden; margin-top: 20px; }
+#growth-fill { width: 0; height: 100%; background: #c2d49b; transition: width 0.25s; }
+.control-hint { bottom: 39px; left: 50%; transform: translateX(-50%); text-align: center; font-size: 11px; color: #bbcfb7; white-space: nowrap; }
+.control-hint > div { margin-top: 12px; font-size: 9px; color: #809f90; }
+.control-hint > div > span { color: #b6c6b1; font-size: 9px; }
+.control-hint i { font-style: normal; margin: 0 5px; color: #59796d; }
+.nutrient-dot { display: inline-block; width: 5px; height: 5px; background: #e9c889; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #e9c88966; vertical-align: 1px; }
+#loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 24px; border-radius: 10px; background: #0b2829; color: #c6d5b9; font-size: 13px; text-align: center; z-index: 3; }
+#loading[hidden] { display: none; }
+.site-footer { height: 43px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; color: #819080; font-size: 8px; letter-spacing: 1.4px; }
+.site-footer i { font-style: normal; padding: 0 8px; color: #afb9a8; }
+.footer-dot { display: inline-block; width: 4px; height: 4px; background: #849e72; border-radius: 50%; vertical-align: 1px; margin-right: 5px; }
+@media (max-width: 1150px) { .control-hint { bottom: 30px; } .control-hint > div { max-width: 240px; white-space: normal; line-height: 1.9; } .species-card { width: 225px; } .growth-card { width: 198px; } }
+@media (max-width: 900px) { .control-hint { top: 36px; bottom: auto; left: 50%; max-width: 230px; white-space: normal; line-height: 1.7; } .control-hint > div { display: none; } }
+@media (max-width: 680px) { #app { padding: 0 12px; min-height: 600px; } .site-header { height: 66px; } .brand { font-size: 25px; } .header-note { display: none; } .build-tag { font-size: 8px; gap: 5px; letter-spacing: 1px; } .arena-heading { top: 24px; left: 23px; } h1 { font-size: 29px; } .control-hint { display: none; } .species-card { bottom: 20px; left: 16px; width: 184px; padding: 15px; } h2 { font-size: 20px; } .species-card p { font-size: 10px; } .growth-card { width: 136px; right: 16px; bottom: 20px; padding: 15px; } .growth-card .eyebrow { letter-spacing: 1px; } #growth-label { display: none; } .eaten-count { display: none; } #mass { font-size: 35px; } .site-footer > span:last-child { display: none; } }
+
+/* M1.5: four foods, one energy meter and one contextual shortage. */
+.food-guide { top: 30px; right: 30px; width: 216px; padding: 17px 18px; background: #0a2829b3; border: 1px solid #a4c7a426; border-radius: 12px; backdrop-filter: blur(14px); }
+#food-legend { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 13px; }
+#food-legend li { display: flex; align-items: center; gap: 12px; }
+#food-legend strong { font-size: 10px; font-weight: 500; color: #d3dfcb; display: block; }
+#food-legend small { display: block; color: #8fa99d; font-size: 9px; margin-top: 3px; }
+.food-symbol { display: inline-block; flex: 0 0 10px; width: 10px; height: 10px; background: var(--food-color); border-radius: 50%; }
+.food-symbol[data-shape=diamond] { border-radius: 0; transform: rotate(45deg); width: 9px; height: 9px; }
+.food-symbol[data-shape=capsule] { height: 6px; width: 13px; flex-basis: 13px; border-radius: 4px; }
+.food-symbol[data-shape=cluster] { background: none; position: relative; }
+.food-symbol[data-shape=cluster]::after { content: ''; position: absolute; width: 6px; height: 6px; background: var(--food-color); border-radius: 50%; box-shadow: 5px 0 var(--food-color), 2px -5px var(--food-color); top: 5px; }
+.growth-card { width: 256px; }
+.energy-row { display: flex; justify-content: space-between; margin-top: 16px; color: #96b2a2; font-size: 8px; letter-spacing: 1px; }
+#energy { color: #e9c889; font-variant-numeric: tabular-nums; }
+.energy-track { height: 3px; margin-top: 7px; background: #9ec49b1f; border-radius: 3px; overflow: hidden; }
+#energy-fill { height: 100%; background: #e9c889; }
+#nutrition-status { margin: 15px 0 4px; font-size: 12px; color: #dfdcc1; }
+#food-advice { font-size: 10px; color: #a4bdac; margin: 0; line-height: 1.5; }
+#digestion-status { border-top: 1px solid #b6d2a51a; margin-top: 13px; padding-top: 11px; font-size: 9px; color: #8da99a; line-height: 1.5; min-height: 26px; }
+@media (max-width: 1150px) { .control-hint { max-width: 250px; white-space: normal; } }
+@media (max-width: 900px) { .control-hint { display: none; } .food-guide { width: 204px; } }
+@media (max-width: 680px) { .food-guide { top: 140px; right: 17px; width: 164px; padding: 12px; } #food-legend { gap: 9px; } #food-legend small { display: none; } .growth-card { width: 171px; padding: 13px; } .species-card { width: 150px; padding: 12px; } .species-card h2 { font-size: 18px; } .growth-track { margin-top: 10px; } .energy-row { margin-top: 10px; } #nutrition-status { margin-top: 11px; font-size: 11px; } #food-advice { font-size: 9px; } #digestion-status { font-size: 8px; } }
+.nutrient-inventory { margin-top: 14px; pointer-events: auto; border-top: 1px solid #b6d2a51a; padding-top: 12px; }
+.nutrient-inventory summary { color: #c3d8b7; font-size: 11px; cursor: pointer; }
+.nutrient-inventory summary:focus-visible { outline: 2px solid #e9c889; outline-offset: 4px; }
+#nutrient-inventory { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 9px; }
+#nutrient-inventory li { display: grid; grid-template-columns: 1fr auto; gap: 3px 8px; font-size: 10px; color: #d8e2cc; }
+#nutrient-inventory output { font-variant-numeric: tabular-nums; color: #e9c889; }
+#nutrient-inventory li[hidden] { display: none; }
+#nutrient-inventory small { grid-column: 1 / -1; font-size: 8px; color: #8da99a; line-height: 1.4; }
+.species-card .inventory-note { font-size: 8px; margin-top: 12px; max-width: none; line-height: 1.5; }
+@media (max-height: 760px) { .nutrient-inventory[open] { max-height: 215px; overflow-y: auto; } }
+/* M2 species selection and compact ability controls. */
+.selection { flex: 1; background: radial-gradient(ellipse at 50% 15%, #1e514a, #091e23); border-radius: 18px; padding: 45px 40px 24px; color: #e3ead9; text-align: center; overflow: auto; }
+.selection h1 { font-size: clamp(30px, 3.2vw, 46px); }
+.selection-intro, .selection-note { color: #9bb8a9; font-size: 13px; line-height: 1.6; }
+.selection-note { font-size: 11px; margin: 25px 0 10px; }
+.roster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; max-width: 1100px; margin: 28px auto 0; text-align: left; }
+.roster-card { border: 1px solid #b3d5b533; background: #082829a6; border-radius: 15px; padding: 24px; display: flex; flex-direction: column; }
+.roster-card h2 { font-size: 29px; color: var(--species-color); margin-bottom: 4px; }
+.scientific-name { color: #92b1a7; font: italic 12px Georgia, serif; }
+.roster-card p, .roster-card dd { color: #abc2b7; font-size: 12px; line-height: 1.6; }
+.roster-card p { min-height: 39px; }
+.roster-card dl { margin-top: 5px; flex: 1; }
+.roster-card dt { font-size: 10px; letter-spacing: .8px; color: #d7e6cf; margin: 15px 0 5px; }
+.roster-card dd { margin: 0; }
+.roster-card button { background: #c4d9b5; border: none; color: #173b38; padding: 12px; border-radius: 7px; margin-top: 12px; font-weight: 600; }
+.roster-card button:hover { background: #e0edce; }
+.roster-art { height: 96px; display: grid; place-items: center; }
+.roster-art span { width: 73px; height: 70px; background: color-mix(in srgb, var(--species-color) 20%, transparent); border: 2px solid var(--species-color); border-radius: 42% 58% 36% 64% / 57% 41% 59% 43%; box-shadow: 0 0 32px #afdfb219; position: relative; }
+.roster-art span::after { content: ''; position: absolute; width: 22px; height: 19px; border-radius: 50%; background: var(--species-color); opacity: .5; left: 22px; top: 22px; }
+.roster-art.slipper span { width: 100px; height: 46px; border-radius: 50% 40% 45% 50%; transform: rotate(-25deg); outline: 3px dotted #c1e9f055; outline-offset: 4px; }
+.roster-art.slipper span::after { top: 11px; left: 35px; }
+.roster-art.barrel span { width: 72px; height: 62px; border-radius: 38%; outline: 3px dotted #f4c9a733; outline-offset: 3px; }
+.sandbox-actions { display: flex; gap: 14px; margin-top: 16px; pointer-events: auto; }
+.sandbox-actions a, .sandbox-actions button { font-size: 10px; color: #bdd0b9; background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 4px; }
+.species-card { max-height: calc(100% - 195px); overflow-y: auto; scrollbar-width: thin; }
+.ability-panel { margin-top: 15px; padding-top: 13px; border-top: 1px solid #b6d2a51a; display: grid; gap: 6px; }
+#activate-ability { pointer-events: auto; padding: 7px 5px; border: 1px solid #bdd0b93b; border-radius: 5px; background: #bfd7b317; color: #d6e7c9; font-size: 11px; text-align: left; }
+#activate-ability[aria-disabled=true] { opacity: .6; }
+kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; padding: 3px; margin-right: 3px; }
+#ability-status { font-size: 12px; color: #e9c889; }
+.ability-panel small, #ability-message { font-size: 9px; color: #9db6a7; line-height: 1.4; }
+#ability-message:empty { display: none; }
+.reproduction-panel { display: grid; gap: 5px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #b6d2a51a; }
+#reproduce { pointer-events: auto; padding: 7px 5px; border: 1px solid #bdd0b93b; border-radius: 5px; background: #bfd7b317; color: #d6e7c9; font-size: 11px; text-align: left; }
+#reproduce[aria-disabled=true] { opacity: .6; }
+#reproduction-status { font-size: 10px; color: #e9c889; }
+.reproduction-panel small, #reproduction-message { font-size: 9px; color: #9db6a7; line-height: 1.4; }
+#reproduction-message:empty { display: none; }
+.kit-details { pointer-events: auto; margin-top: 13px; font-size: 10px; color: #a6c0ab; }
+.kit-details summary { cursor: pointer; }
+.kit-details p { margin-top: 10px; }
+@media (max-width: 900px) { .selection { padding: 25px 20px; } .roster { gap: 12px; } .roster-card { padding: 18px; } .roster-card h2 { font-size: 23px; } }
+@media (max-width: 680px) { .roster { grid-template-columns: 1fr; } .roster-card p { min-height: 0; } .sandbox-actions { flex-direction: column; gap: 9px; } .species-card { max-height: calc(100% - 225px); } }
+.diet-note { font-size: 10px; color: #e1c7ac; line-height: 1.5; border-top: 1px solid #b6d2a51a; padding-top: 10px; margin: 13px 0 0; }
+.zone-key { color: #9ebcb3; font-size: 9px; line-height: 1.7; border-top: 1px solid #b6d2a51a; padding-top: 10px; margin-bottom: 0; }
+.arena-heading #environment-status { margin-top: 13px; color: #d5d6ad; font-size: 11px; }
+.roster-art.flagellate span { width: 100px; height: 42px; border-radius: 65% 35% 65% 35%; transform: rotate(-25deg); }
+.roster-art.flagellate span::after { top: 7px; left: 68px; width: 8px; height: 8px; background: #db714f; opacity: 1; }
+.roster-art.diatom span { width: 112px; height: 34px; border-radius: 90% 5%; transform: rotate(20deg); background: repeating-linear-gradient(90deg, transparent 0 5px, #dfcb7944 5px 6px); }
+.roster-art.diatom span::after { width: 16px; height: 12px; top: 8px; left: 47px; }
+#population { font-size: 10px; color: #9cb9ac; }
+.death-panel { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; background: #041719a8; backdrop-filter: blur(5px); }
+.death-panel[hidden] { display: none; }
+.death-panel > div { max-width: 380px; margin: 20px; background: #0c3030; border: 1px solid #b6d2a54a; border-radius: 18px; padding: 32px; text-align: center; box-shadow: 0 20px 60px #0004; }
+.death-panel h2 { font-size: 32px; font-style: normal; margin-top: 18px; }
+.death-panel p { color: #abc4b5; font-size: 12px; line-height: 1.7; }
+#death-reason { color: #f0c6ad; font-size: 16px; }
+#respawn { display: block; width: 100%; margin: 25px 0 18px; padding: 12px; border: none; border-radius: 6px; color: #173b38; background: #c4d9b5; font-weight: 600; }
+#respawn:disabled { opacity: .55; cursor: default; }
+.death-panel a { font-size: 11px; color: #bbd1bc; }
+@media (max-width: 900px) { .sandbox-actions { flex-wrap: wrap; gap: 10px; max-width: 290px; } }
+@media (max-height: 760px) {
+  .food-guide { max-height: calc(100% - 355px); overflow-y: auto; pointer-events: auto; scrollbar-width: thin; scrollbar-color: #6c9684 #0a2829; }
+  .species-card { max-height: calc(100% - 220px); }
+}
+.hunger-row { display: flex; justify-content: space-between; margin-top: 13px; color: #b9d5b2; font-size: 8px; letter-spacing: 1px; }
+.hunger-track { height: 6px; margin-top: 7px; overflow: hidden; border-radius: 4px; background: #9ec49b1f; }
+#hunger-fill { height: 100%; background: #a5cf83; transition: width .15s linear; }
+.hunger-track[data-state="low"] #hunger-fill { background: #e9bd66; }
+.hunger-track[data-state="starving"] { background: #c96b5855; }
+.hunger-track[data-state="starving"] #hunger-fill { background: #e1876d; }
+#hunger-status { font-size: 10px; line-height: 1.5; color: #b8c9ad; margin: 8px 0 0; }
+@media (max-width: 680px) { #hunger-status { font-size: 9px; } .hunger-row { margin-top: 9px; } }

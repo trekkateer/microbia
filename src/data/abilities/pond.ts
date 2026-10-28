@@ -1,0 +1,9 @@
+import type { AbilityDefinition } from '../schemas';
+// Timing, costs and force are game abstractions; source biology lives in facts/pond.ts.
+export const abilities: Readonly<Record<string, AbilityDefinition>> = {
+  phototaxis: { id: 'phototaxis', visual: 'eyespot', name: 'Phototaxis', description: 'Sense favorable light and turn toward it for two seconds.', effect: 'phototaxis', cooldown: 6, costs: { energy: 3 }, duration: 2, range: 3200, speed: 105, stun: 0, push: 0, digestionSeconds: 0, transferFraction: 0 },
+  'substrate-glide': { id: 'substrate-glide', visual: 'raphe', name: 'Glide', description: 'Glide a short distance along the substrate in your chosen direction.', effect: 'glide', cooldown: 7, costs: { energy: 4 }, duration: 1.2, range: 100, speed: 85, stun: 0, push: 0, digestionSeconds: 0, transferFraction: 0 },
+  'pseudopod-engulf': { id: 'pseudopod-engulf', visual: 'pseudopods', name: 'Pseudopod engulf', description: 'Get almost membrane-to-membrane with smaller prey, then wrap it in pseudopods. Only the first attacker can claim it.', effect: 'capture', cooldown: 6, costs: { energy: 8 }, duration: 0.9, activationGap: 8, range: 65, speed: 0, stun: 0, push: 0, digestionSeconds: 3, transferFraction: 0.65 },
+  'avoidance-reaction': { id: 'avoidance-reaction', visual: 'trichocysts', name: 'Avoidance reaction', description: 'Reverse instantly and discharge trichocysts to push susceptible attackers away.', effect: 'reverse', cooldown: 5, costs: { energy: 6, nitrogen: 0.5 }, duration: 0.4, range: 55, speed: 300, stun: 0, push: 105, digestionSeconds: 0, transferFraction: 0 },
+  'toxicyst-strike': { id: 'toxicyst-strike', visual: 'toxicysts', name: 'Toxicyst strike', description: 'Lunge forward. Contact stuns eligible Paramecium, then capture it within reach.', effect: 'strike', cooldown: 3, costs: { energy: 4 }, duration: 0.36, range: 35, speed: 400, stun: 1.1, push: 0, digestionSeconds: 2.5, transferFraction: 0.75 },
+};

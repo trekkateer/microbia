@@ -1,0 +1,51 @@
+import { it, expect } from 'vitest';
+import { Room } from '../src/server/room';
+import { RoomBroadcast } from '../src/server/broadcast';
+import { PondDecoder, type PondPacket } from '../src/network/protocol';
+import { killOrganism } from '../src/sim/systems/lifecycle';
+
+it('round-trips owned reserves and remote rendering, applies food deltas without mutating old snapshots, and resynchronizes a skipped client', () => {
+  const room = new Room('wire'); room.join('a','a','paramecium-caudatum'); room.join('b','b','didinium-nasutum');
+  const encoder = new RoomBroadcast(), decoder = new PondDecoder(), late = new PondDecoder();
+  let frame=encoder.prepare(room);
+  const packet=JSON.parse(frame('a',true)) as PondPacket;
+  const first=decoder.decode(packet);
+  expect(first.player.nutrients).toEqual(room.state('a').player.nutrients);
+  expect(first.organisms.find(p=>p.ownerId==='b')!.x).toBeCloseTo(room.state('b').player.x,2);
+  expect(packet.own.every(p=>p.ownerId==='a')).toBe(true);
+  expect(JSON.stringify(packet.actors)).not.toContain('reserves');
+  const before=first.foodParticles[0].x;
+  const own=room.world.organisms.find(p=>p.ownerId==='a')!;
+  own.x+=10;
+  room.world.foodParticles[0].x+=11;room.world.foodParticles[0].availableAtTick+=90;
+  frame=encoder.prepare(room);
+  const nextPacket=JSON.parse(frame('a',false)) as PondPacket;
+  expect(nextPacket.food).toHaveLength(1);
+  const next=decoder.decode(nextPacket);
+  expect(next.player.motionPath).toEqual([{ x: first.player.x, y: first.player.y }, { x: own.x, y: own.y }]);
+  expect(first.player.motionPath).toHaveLength(1);
+  expect(next.foodParticles[0].x).toBe(before+11);expect(first.foodParticles[0].x).toBe(before);
+  room.world.foodParticles[1].y+=33;frame=encoder.prepare(room);
+  const reset=late.decode(JSON.parse(frame('b',true)));
+  expect(reset.player.ownerId).toBe('b');expect(reset.foodParticles).toEqual(room.world.foodParticles);
+  room.leave('b');frame=encoder.prepare(room);
+  expect(decoder.decode(JSON.parse(frame('a',false))).organisms.some(p=>p.ownerId==='b')).toBe(false);
+});
+
+it('handles reordered movement and late one-shot inputs exactly once, and retains only one eliminated-owner death record', () => {
+  const room=new Room('input');room.join('a','a','paramecium-caudatum');
+  room.input('a',2,{direction:{x:1,y:0}});
+  room.input('a',1,{direction:{x:-1,y:0},activate:true});
+  const client=room.clients.get('a')!;
+  expect(client.command.direction.x).toBe(1);expect(client.command.activate).toBe(true);
+  room.advance();expect(client.command.activate).toBe(false);
+  room.input('a',1,{direction:{x:-1,y:0},activate:true});
+  expect(client.command.activate).toBe(false);
+  expect(()=>room.input('a',3,{direction:{x:NaN,y:0}})).toThrow();
+  expect(client.lastSequence).toBe(2);
+  const actor=room.world.organisms.find(p=>p.ownerId==='a')!;
+  const duplicate=structuredClone(actor);duplicate.id='dead-child';duplicate.parentId=actor.id;room.world.organisms.push(duplicate);
+  killOrganism(room.world,actor,'test',30);killOrganism(room.world,duplicate,'test',30);
+  room.advance();expect(room.world.organisms.filter(p=>p.ownerId==='a')).toHaveLength(1);
+  expect(room.state('a').player.alive).toBe(false);
+});
