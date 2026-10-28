@@ -50,6 +50,12 @@ Choose a species. Steer your cells with the mouse, WASD or arrow keys. Mouse ste
 
 ### Reproduction
 
+Switching tabs keeps the pond running. Multiplayer continues on the server;
+local play transfers simulation to a worker while hidden and resumes from that
+state when you return. Controls reset on switching away, and hidden tabs skip
+rendering. Browser tab suspension/discard or putting the computer to sleep can
+still suspend local play; multiplayer keeps running while the server is available.
+
 Division now has a 1.2-second membrane animation: a daughter forms gradually,
 the cells ease apart, and the connecting neck narrows and separates. Organelles
 scale with each cell. The visual runs for players and AI in local and multiplayer
