@@ -49,7 +49,7 @@ export function validateDefinitions(arena: ArenaDefinition, roster: Readonly<Rec
     if (arena.roster.includes(id) && (entry.npc || entry.activeId === null)) throw new Error('Species is not playable yet');
     const a = entry.activeId === null ? null : abilities[entry.activeId];
     if (entry.activeId !== null) {
-    if (!a || a.id !== entry.activeId || !['capture', 'reverse', 'strike', 'phototaxis', 'glide'].includes(a.effect)
+    if (!a || a.id !== entry.activeId || !['capture', 'discharge', 'strike', 'phototaxis', 'glide'].includes(a.effect)
       || !positive(a.cooldown) || !positive(a.duration) || !positive(a.range)
       || ![a.speed, a.stun, a.push, a.digestionSeconds, a.transferFraction].every(nonnegative)
       || a.transferFraction > 1 || (['capture', 'strike'].includes(a.effect) && (!positive(a.digestionSeconds) || !positive(a.transferFraction)))) throw new Error('Invalid ability');
