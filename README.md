@@ -4,6 +4,26 @@
 
 ## Run
 
+### Multiplayer connection diagnostics
+
+Multiplayer now prefers one WebSocket at `/api/socket` for state and input,
+avoiding a separate HTTP request for every steering update. HTTP POST/SSE remains
+available if a WebSocket upgrade is blocked. Both paths authenticate sessions,
+use sequence-checked server-authoritative commands and resynchronize food after
+congestion. Server pings remove abandoned socket connections.
+
+The online status shows transport, input round-trip time (RTT), server simulation
+frequency and step time, plus client FPS. Low server Hz indicates simulation
+slowdown; high RTT indicates connection delay; low FPS indicates client rendering
+cost. These measurements describe different parts of the experience and are not
+an input-to-screen latency measurement. Render free compute remains a prototype
+hosting tier; changing the domain does not increase compute capacity.
+
+Run `npm run test:transport` for a live local-server check of WebSocket movement,
+authentication, disconnect cleanup and SSE compatibility. This requires local
+loopback connections. Custom domains use the same-origin secure WebSocket URL;
+the Vite development proxy forwards WebSocket upgrades too.
+
 ### Public hosting (Render)
 
 The root `render.yaml` deploys the frontend and authoritative Node server together.

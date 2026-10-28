@@ -223,6 +223,15 @@ The HUD displays the least-fed owned cell and starving-cell counts. Low hunger (
 
 ## Public hosting preparation
 
+Live latency follow-up: replace per-input HTTP requests with a persistent
+WebSocket using ws, while retaining POST/SSE for old clients and blocked upgrades.
+Both transports share room simulation, compact encoding and congestion recovery.
+Added native ping/pong liveness, bounded payloads and input buffering, plus a fresh
+fallback session to avoid cleanup races. The client displays transport, RTT,
+server tick rate/step cost and render FPS. Added real socket integration coverage
+and mocked-client tests for WebSocket input, queued actions and fallback. Keep
+free hosting unchanged; future sizing should follow live measurements.
+
 Division presentation follow-up: added a 1.2-second client animation that observes
 authoritative births, grows the daughter membrane and organelles, eases both cells
 apart and pinches off a membrane neck. Death and generation changes cancel the

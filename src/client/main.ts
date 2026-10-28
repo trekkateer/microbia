@@ -21,7 +21,7 @@ async function start(): Promise<void> {
   let network: Awaited<ReturnType<typeof connectPond>> | undefined;
   if (online) {
     try { network = await connectPond(organism.id, room); }
-    catch (error) { const notice = document.createElement('p'); notice.textContent = String(error) + ' — reload to try again or choose local play.'; document.querySelector('#app')!.append(notice); return; }
+    catch (error) { const notice = document.createElement('p'); notice.textContent = String(error) + ' - reload to try again or choose local play.'; document.querySelector('#app')!.append(notice); return; }
   }
   const hud = createHud(document.querySelector<HTMLElement>('#app')!, arena, organism, nutrition);
   const app = new Application();
@@ -94,7 +94,7 @@ async function start(): Promise<void> {
     });
     networkBlend += delta;
     renderer.render(previous, current, network ? Math.min(1, networkBlend / (2 / 30)) : alpha, camera, delta);
-    if (network) { app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status; }
+    if (network) { app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status + ' | FPS ' + Math.round(ticker.FPS); }
     if (current.tick !== lastHudTick) {
       hud.update(current.player, current.tick, current.organisms);
       lastHudTick = current.tick;
