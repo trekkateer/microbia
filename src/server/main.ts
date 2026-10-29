@@ -23,7 +23,7 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/api/join' && req.method === 'POST') {
       const body = await bodyOf(req);
       const name = typeof body.room === 'string' ? body.room : 'pond';
-      if (!/^[a-zA-Z0-9-]{1,24}$/.test(name)) throw new Error('Use 1–24 letters, numbers or hyphens for the room');
+      if (!/^[a-zA-Z0-9-]{1,24}$/.test(name)) throw new Error('Use 1-24 letters, numbers or hyphens for the room');
       if (!rooms.has(name)) { if (rooms.size >= 16) throw new Error('Server room limit reached'); rooms.set(name, new Room(name)); }
       const room = rooms.get(name)!, id = randomUUID(), token = randomUUID();
       room.join(id, token, String(body.speciesId));

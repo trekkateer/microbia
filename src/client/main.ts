@@ -21,7 +21,7 @@ async function start(): Promise<void> {
   let network: Awaited<ReturnType<typeof connectPond>> | undefined;
   if (online) {
     try { network = await connectPond(organism.id, room); }
-    catch (error) { const notice = document.createElement('p'); notice.textContent = String(error) + ' — reload to try again or choose local play.'; document.querySelector('#app')!.append(notice); return; }
+    catch (error) { const notice = document.createElement('p'); notice.textContent = String(error) + ' - reload to try again or choose local play.'; document.querySelector('#app')!.append(notice); return; }
   }
   const hud = createHud(document.querySelector<HTMLElement>('#app')!, arena, organism, nutrition);
   const app = new Application();

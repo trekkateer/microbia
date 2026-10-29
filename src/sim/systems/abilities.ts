@@ -123,7 +123,7 @@ function consume(world: World, actor: PlayerState, prey: PlayerState, ability: A
   actor.lastFoodId = `prey:${prey.speciesId}`;
   killOrganism(world, prey, `Eaten by ${definition(world, actor).name}`, rate);
   actor.ability = null;
-  actor.abilityMessage = 'Prey captured · digesting';
+  actor.abilityMessage = 'Prey captured � digesting';
 }
 
 export function advanceAbility(world: World, actor: PlayerState, before: Vec2, rate: number): void {
@@ -133,7 +133,7 @@ export function advanceAbility(world: World, actor: PlayerState, before: Vec2, r
     const prey = actors(world).find(p => availablePrey(world, actor, p) && world.contacts.has(contactKey(actor, p)));
     if (prey) {
       actor.ability = { effect: 'capture', startedAtTick: world.tick, until: world.tick + Math.ceil(species.contactCaptureSeconds * rate * (definition(world, prey).defense?.captureDuration ?? 1)), targetId: prey.id, direction: { x: Math.cos(actor.heading), y: Math.sin(actor.heading) } };
-      actor.abilityMessage = 'Contact feeding · stay within reach';
+      actor.abilityMessage = 'Contact feeding � stay within reach';
     }
   }
   const state = actor.ability;
@@ -149,7 +149,7 @@ export function advanceAbility(world: World, actor: PlayerState, before: Vec2, r
       prey.stunnedUntil = world.tick + Math.ceil(ability.stun * rate * (definition(world, prey).defense?.stun ?? 1));
       prey.ability = null;
       actor.ability = { ...state, effect: 'capture', startedAtTick: world.tick, targetId: prey.id, until: world.tick + Math.ceil(ability.stun * rate * 0.7 * (definition(world, prey).defense?.captureDuration ?? 1)) };
-      actor.abilityMessage = 'Toxicyst hit · capturing';
+      actor.abilityMessage = 'Toxicyst hit � capturing';
       return;
     }
   }
