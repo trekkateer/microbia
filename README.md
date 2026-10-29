@@ -4,6 +4,26 @@
 
 ## Run
 
+### Multiplayer connection diagnostics
+
+Multiplayer now prefers one WebSocket at `/api/socket` for state and input,
+avoiding a separate HTTP request for every steering update. HTTP POST/SSE remains
+available if a WebSocket upgrade is blocked. Both paths authenticate sessions,
+use sequence-checked server-authoritative commands and resynchronize food after
+congestion. Server pings remove abandoned socket connections.
+
+The online status shows transport, input round-trip time (RTT), server simulation
+frequency and step time, plus client FPS. Low server Hz indicates simulation
+slowdown; high RTT indicates connection delay; low FPS indicates client rendering
+cost. These measurements describe different parts of the experience and are not
+an input-to-screen latency measurement. Render free compute remains a prototype
+hosting tier; changing the domain does not increase compute capacity.
+
+Run `npm run test:transport` for a live local-server check of WebSocket movement,
+authentication, disconnect cleanup and SSE compatibility. This requires local
+loopback connections. Custom domains use the same-origin secure WebSocket URL;
+the Vite development proxy forwards WebSocket upgrades too.
+
 ### Public hosting (Render)
 
 The root `render.yaml` deploys the frontend and authoritative Node server together.
@@ -50,6 +70,17 @@ Choose a species. Steer your cells with the mouse, WASD or arrow keys. Mouse ste
 
 ### Reproduction
 
+Switching tabs keeps the pond running. Multiplayer continues on the server;
+local play transfers simulation to a worker while hidden and resumes from that
+state when you return. Controls reset on switching away, and hidden tabs skip
+rendering. Browser tab suspension/discard or putting the computer to sleep can
+still suspend local play; multiplayer keeps running while the server is available.
+
+Division now has a 1.2-second membrane animation: a daughter forms gradually,
+the cells ease apart, and the connecting neck narrows and separates. Organelles
+scale with each cell. The visual runs for players and AI in local and multiplayer
+ponds; authoritative biomass, nutrition and collisions still split immediately.
+
 | Species | Minimum fraction of maximum biomass | Mass needed per cell |
 | --- | --- | --- |
 | Euglena | 30% | 48 |
@@ -92,20 +123,20 @@ The round continues while any of your cells survives. After losing the last one,
 
 Manual checks: grow to the displayed threshold, press R, confirm two **YOU**/player markers and unchanged total biomass, then steer both daughters. Pressing R again immediately must not split them. As Amoeba, swim toward nearby eligible prey and press Space; confirm the nearest ready, forward-facing daughter attacks and pays the cost. As Didinium, point at prey and check the closest ready daughter attacks. Verify the round continues after one daughter is eaten. Inventory totals include all your living cells; each retains independent reserves and feeding needs.
 
-1. **Solid collisions:** steer into another organism. Bodies press against and slide around each other instead of passing through. Test a Didinium lunge or Paramecium reversal near other organisms. Knockback also respects bodies and walls. Cilia, flagella, optical halos and ability effects are decorative; membrane bodies are solid.
+1. **Solid collisions:** steer into another organism. Bodies press against and slide around each other instead of passing through. Test a Didinium lunge or Paramecium discharge near other organisms. Knockback also respects bodies and walls. Cilia, flagella, optical halos and ability effects are decorative; membrane bodies are solid.
 2. **A living pond:** start with 22 AI neighbors: three Amoebae, six Paramecium, three Didinium, five Euglena and five Diatoms. Labels identify species and biomass; controlled cells also show YOU. Activity announcements are hidden. Follow a Paramecium to watch it forage; approach smaller prey as a predator to see it flee. Hunters choose prey their species can actually eat.
 3. **Amoeba:** collect mixed foods, approach a smaller eligible organism until your membranes nearly touch, swim toward it and press Space. Other smaller Amoebae are edible; your own controlled cells are protected. Stay within reach through the 0.9-second wrap. Fast prey can escape; defensive discharge can interrupt capture. A failed target check costs nothing, but an interrupted committed attempt keeps its cost and cooldown.
-4. **Paramecium:** gather food particles and use tight turns to escape. Press Space to reverse and discharge trichocysts. Didinium resists the push, so early evasion matters. Protein-rich food replenishes the nitrogen needed for repeated defensive use.
+4. **Paramecium:** gather food particles and use tight turns to escape. Press Space to push nearby rivals away and discharge trichocysts. Didinium resists the push, so early evasion matters. Protein-rich food replenishes the nitrogen needed for repeated defensive use.
 5. **Didinium:** hunt Paramecium. Space lunges into prey; solid membrane contact triggers a stun and capture. Particles do not feed you. Without enough energy to strike, basic contact feeding remains available: touch eligible prey and stay close for 2.5 seconds. Depleted energy drains mass; 30 continuous seconds without energy causes death.
 6. **Single-celled life only:** all pond organisms are unicellular. Watch for Amoeba and Didinium predators; no multicellular organisms are included.
 7. **Death and respawn:** being eaten shows the cause of death. After three seconds, click **Respawn** to return as the same species at starting mass with clean inventories, fresh reserves and reset abilities. The new position avoids living bodies. A soft ring marks three seconds of protection; neither side can attack during this settling period. AI organisms return after seven seconds to keep the pond populated.
 8. **Nutrition:** open **Absorbed nutrients** to inspect current stock. Watch prey enter digestion before it contributes to growth. AI organisms have independent inventories and pay the same feeding, growth and ability costs.
-9. Resize the window, or switch tabs and return. The canvas resizes, input clears on focus loss, and hidden time does not advance the simulation. **Change species** starts a fresh local pond.
+9. Resize the window, or switch tabs and return. The canvas resizes, input clears on focus loss, and the pond continues running while hidden. **Change species** starts a fresh local pond.
 
 | Playable species | Passive / diet | Space | Cost / cooldown | Weakness |
 | --- | --- | --- | --- | --- |
 | Amoeba proteus | Phagocytosis; all four particle foods and eligible smaller pond prey including other Amoebae, with less than 70% of its mass | Pseudopod engulf | 8 energy / 6s | Slow movement; prey can escape or interrupt capture |
-| Paramecium caudatum | Cilia; fastest movement and tightest turns; particle feeding | Avoidance reaction | 6 energy + 0.5 nitrogen / 5s | Didinium specializes in hunting it and resists discharge |
+| Paramecium caudatum | Cilia; fastest movement and tightest turns; particle feeding | Trichocyst discharge | 6 energy + 0.5 nitrogen / 5s | Didinium specializes in hunting it and resists discharge |
 | Didinium nasutum | Specialist hunter; Paramecium up to 150% of its mass; resists trichocysts | Toxicyst strike | 4 energy / 3s | No particle grazing or general prey diet; high upkeep and starvation |
 | Euglena gracilis | Photosynthesis; CO₂, ammonium and phosphate uptake | Phototaxis, 2s of turning/swimming toward a favorable light zone | 3 energy / 6s | Vulnerable; loses 0.35 mass/s in darkness down to its floor |
 | Navicula radiosa | Silica frustule; CO₂, nitrate, phosphate and silicate uptake | Glide, 1.2s of directed substrate movement | 4 energy / 7s | Very slow; growth needs silicate |

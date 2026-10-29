@@ -36,7 +36,7 @@ export interface AbilityDefinition {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly effect: 'capture' | 'reverse' | 'strike' | 'phototaxis' | 'glide';
+  readonly effect: 'capture' | 'discharge' | 'strike' | 'phototaxis' | 'glide';
   readonly cooldown: number;
   readonly costs: ResourceAmounts;
   readonly duration: number;

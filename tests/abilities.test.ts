@@ -141,20 +141,37 @@ describe('M2 abilities and feeding', () => {
     w.player.nutrients.peptides = 2;
     advance(w, 1);
     fire(w);
-    expect(w.player.ability?.effect).toBe('reverse');
+    expect(w.player.ability?.effect).toBe('discharge');
     expect(w.player.reserves.nitrogen).toBeGreaterThanOrEqual(0);
   });
-  it('reverses instantly, pushes susceptible attackers, and interrupts their capture', () => {
+  it('pushes susceptible attackers without recoil or turning, and interrupts their capture', () => {
     const w = setup(paramecium), hunter = prey(w, amoeba, 40, 80);
     activateAbility(w, hunter, { x: -1, y: 0 }, TICK_RATE);
     expect(hunter.ability?.targetId).toBe(w.player.id);
     const start = w.player.x, before = hunter.x;
     fire(w);
-    expect(w.player.x).toBeLessThan(start);
+    expect(w.player.x).toBe(start);
     expect(hunter.x - before).toBeCloseTo(105);
     expect(hunter.ability).toBeNull();
     expect(hunter.cooldownUntil).toBeGreaterThan(0);
-    expect(Math.cos(w.player.heading)).toBeCloseTo(-1);
+    expect(Math.cos(w.player.heading)).toBeCloseTo(1);
+  });
+  it('discharges radially without sideways drift and retains normal steering throughout', () => {
+    const w = setup(paramecium);
+    const above = prey(w, amoeba, 40, 0); above.y += 100;
+    const left = prey(w, amoeba, 40, -100);
+    const ally = prey(w, paramecium, 25, 100); ally.colonyId = w.player.colonyId;
+    const far = prey(w, amoeba, 40, 1000);
+    activateAbility(w, w.player, { x: 1, y: 0 }, TICK_RATE);
+    expect(above.pendingMotion.x).toBe(0);
+    expect(above.pendingMotion.y).toBeCloseTo(105);
+    expect(left.pendingMotion.x).toBeCloseTo(-105);
+    expect(ally.pendingMotion).toEqual({ x: 0, y: 0 });
+    expect(far.pendingMotion).toEqual({ x: 0, y: 0 });
+    const before = w.player.x;
+    for (let i = 0; i < 6; i++) step(w, { direction: { x: 1, y: 0 } });
+    expect(w.player.x).toBeGreaterThan(before + 20);
+    expect(w.player.ability?.effect).toBe('discharge');
   });
   it('Didinium resists discharge and specializes against larger Paramecium', () => {
     const w = setup(paramecium), hunter = prey(w, didinium, 25, 70);

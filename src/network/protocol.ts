@@ -3,8 +3,8 @@ import { createOrganism } from '../sim/world';
 import { species } from '../data';
 import { nutrition } from '../data/nutrition';
 
-export function packActor(p: PlayerState) { return [p.id, p.speciesId, p.ownerId, p.kind, p.colonyId, Math.round(p.x * 100) / 100, Math.round(p.y * 100) / 100, Math.round(p.radius * 100) / 100, Math.round(p.mass * 100) / 100, Math.round(p.heading * 10000) / 10000, Math.round(p.stretch * 10000) / 10000, p.velocity, Math.round(p.speed * 100) / 100, p.alive, p.generation, p.divisionCount, p.ability, p.protectedUntil, p.stunnedUntil, p.lastAbsorbedTick, p.lastFoodId, p.eaten, Math.round(p.satiety * 1000) / 1000] as const; }
-function unpackActor(p: ReturnType<typeof packActor>) { return { id: p[0], speciesId: p[1], ownerId: p[2], kind: p[3], colonyId: p[4], x: p[5], y: p[6], radius: p[7], mass: p[8], heading: p[9], stretch: p[10], velocity: p[11], speed: p[12], alive: p[13], generation: p[14], divisionCount: p[15], ability: p[16], protectedUntil: p[17], stunnedUntil: p[18], lastAbsorbedTick: p[19], lastFoodId: p[20], eaten: p[21], satiety: p[22] }; }
+export function packActor(p: PlayerState) { return [p.id, p.speciesId, p.ownerId, p.kind, p.colonyId, Math.round(p.x * 100) / 100, Math.round(p.y * 100) / 100, Math.round(p.radius * 100) / 100, Math.round(p.mass * 100) / 100, Math.round(p.heading * 10000) / 10000, Math.round(p.stretch * 10000) / 10000, p.velocity, Math.round(p.speed * 100) / 100, p.alive, p.generation, p.divisionCount, p.ability, p.protectedUntil, p.stunnedUntil, p.lastAbsorbedTick, p.lastFoodId, p.eaten, Math.round(p.satiety * 1000) / 1000, p.parentId] as const; }
+function unpackActor(p: ReturnType<typeof packActor>) { return { id: p[0], speciesId: p[1], ownerId: p[2], kind: p[3], colonyId: p[4], x: p[5], y: p[6], radius: p[7], mass: p[8], heading: p[9], stretch: p[10], velocity: p[11], speed: p[12], alive: p[13], generation: p[14], divisionCount: p[15], ability: p[16], protectedUntil: p[17], stunnedUntil: p[18], lastAbsorbedTick: p[19], lastFoodId: p[20], eaten: p[21], satiety: p[22], parentId: p[23] ?? null }; }
 export interface PondPacket {
   tick: number;
   actors: ReturnType<typeof packActor>[];
@@ -50,3 +50,4 @@ export class PondDecoder {
     return { tick: packet.tick, player, organisms: interpolated.filter(p => p.id !== player.id), foodParticles: this.food, dissolvedPatches: packet.dissolvedPatches };
   }
 }
+

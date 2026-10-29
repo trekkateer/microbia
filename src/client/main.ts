@@ -45,16 +45,44 @@ async function start(): Promise<void> {
   hud.reproduce.addEventListener('click', () => { input.reproduce(); app.canvas.focus(); });
   hud.respawn.addEventListener('click', () => { input.respawn(); app.canvas.focus(); });
   const clock = new FixedStepClock();
-  document.addEventListener('visibilitychange', () => { input.reset(); clock.reset(); previous = current; });
   let skipNextFrame = false;
-  document.addEventListener('visibilitychange', () => { skipNextFrame = true; });
+  let backgroundWorker: Worker | undefined;
+  const beginBackground = () => {
+    if (network || backgroundWorker) return;
+    const worker = new Worker(new URL('./background-simulation.worker.ts', import.meta.url), { type: 'module' });
+    backgroundWorker = worker;
+    worker.onmessage = event => {
+      // Transfer authority back only after the worker has stopped. Keeping the
+      // original world object preserves developer/test references.
+      Object.assign(world, event.data.world);
+      current = snapshot(world); previous = current;
+      clock.reset(); skipNextFrame = true;
+      worker.terminate(); backgroundWorker = undefined;
+      if (document.hidden) beginBackground();
+    };
+    worker.onerror = () => {
+      worker.terminate(); backgroundWorker = undefined;
+      clock.reset(); skipNextFrame = true;
+      console.error('Background pond simulation stopped unexpectedly');
+    };
+    worker.postMessage({ type: 'start', world });
+  };
+  document.addEventListener('visibilitychange', () => {
+    input.reset(); clock.reset(); previous = current; skipNextFrame = true;
+    if (network) {
+      network.send({ direction: { x: 0, y: 0 } });
+      current = network.state; previous = current; networkBlend = 0;
+    } else if (document.hidden) beginBackground();
+    else backgroundWorker?.postMessage({ type: 'stop' });
+  });
   hud.loading.hidden = true;
   const status = document.createElement('div');
   if (network) { status.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:20;background:#102820;color:#e2efc8;padding:8px;pointer-events:none'; hud.host.append(status); }
   let networkBlend = 0;
   let lastHudTick = -1;
+  if (document.hidden) beginBackground();
   app.ticker.add(ticker => {
-    if (document.hidden) return;
+    if (document.hidden || backgroundWorker) return;
     const delta = skipNextFrame ? 0 : Math.min(ticker.elapsedMS / 1000, 0.25);
     skipNextFrame = false;
     const alpha = clock.advance(delta, () => {
@@ -66,7 +94,7 @@ async function start(): Promise<void> {
     });
     networkBlend += delta;
     renderer.render(previous, current, network ? Math.min(1, networkBlend / (2 / 30)) : alpha, camera, delta);
-    if (network) { app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status; }
+    if (network) { app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status + ' | FPS ' + Math.round(ticker.FPS); }
     if (current.tick !== lastHudTick) {
       hud.update(current.player, current.tick, current.organisms);
       lastHudTick = current.tick;

@@ -50,7 +50,7 @@ export function step(world: World, command: MoveCommand, remoteCommands?: Readon
     const ability = definition.activeId ? abilities[definition.activeId] : null;
     let direction = safeDirection(commands.get(p.id)!.direction);
     if (p.stunnedUntil > world.tick) direction = { x: 0, y: 0 };
-    else if (p.ability && p.ability.until > world.tick && p.ability.effect !== 'capture' && ability) {
+    else if (p.ability && p.ability.until > world.tick && p.ability.effect !== 'capture' && p.ability.effect !== 'discharge' && ability) {
       direction = { x: p.ability.direction.x * ability.speed / p.speed, y: p.ability.direction.y * ability.speed / p.speed };
       if (p.ability.effect === 'phototaxis' && Math.hypot(direction.x, direction.y) > 0) {
         const target = Math.atan2(direction.y, direction.x);

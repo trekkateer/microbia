@@ -96,15 +96,15 @@ export function activateAbility(world: World, actor: PlayerState, aim: Vec2, rat
   actor.cooldownUntil = world.tick + Math.ceil(ability.cooldown * rate);
   actor.abilityMessage = ability.name;
   actor.ability = { effect: ability.effect, startedAtTick: world.tick, until: world.tick + Math.ceil(ability.duration * rate * (ability.effect === 'capture' && target ? definition(world, target).defense?.captureDuration ?? 1 : 1)), targetId: target?.id ?? null, direction };
-  if (ability.effect === 'reverse') {
-    actor.ability.direction = { x: -Math.cos(actor.heading), y: -Math.sin(actor.heading) };
-    actor.heading = Math.atan2(actor.ability.direction.y, actor.ability.direction.x);
+  if (ability.effect === 'discharge') {
     for (const other of actors(world)) {
       if (other === actor || sameColony(actor, other) || !other.alive || other.protectedUntil > world.tick || actor.protectedUntil > world.tick || distance(actor, other) > reach(actor, other, ability)) continue;
       const multiplier = (counters.find(c => c.attacker === other.speciesId && c.target === actor.speciesId)?.pushMultiplier ?? 1) * (definition(world, other).defense?.push ?? 1);
-      const d = distance(actor, other) || 1;
-      other.pendingMotion.x += (other.x - actor.x || 1) / d * ability.push * multiplier;
-      other.pendingMotion.y += (other.y - actor.y) / d * ability.push * multiplier;
+      const d = distance(actor, other);
+      const dx = d ? (other.x - actor.x) / d : Math.cos(actor.heading);
+      const dy = d ? (other.y - actor.y) / d : Math.sin(actor.heading);
+      other.pendingMotion.x += dx * ability.push * multiplier;
+      other.pendingMotion.y += dy * ability.push * multiplier;
       if (multiplier > 0.2 && other.ability?.targetId === actor.id) { other.ability = null; other.abilityMessage = 'Capture interrupted'; }
     }
   }
@@ -161,6 +161,6 @@ export function advanceAbility(world: World, actor: PlayerState, before: Vec2, r
     if (world.tick >= state.until) consume(world, actor, prey, ability, rate);
   } else if (world.tick >= state.until) {
     actor.ability = null;
-    actor.abilityMessage = state.effect === 'strike' ? 'Strike missed' : state.effect === 'phototaxis' ? 'Light sensing complete' : state.effect === 'glide' ? 'Glide complete' : 'Reversal complete';
+    actor.abilityMessage = state.effect === 'strike' ? 'Strike missed' : state.effect === 'phototaxis' ? 'Light sensing complete' : state.effect === 'glide' ? 'Glide complete' : 'Discharge complete';
   }
 }

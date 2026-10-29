@@ -53,7 +53,7 @@ export function aiCommand(world: World, actor: PlayerState, rate: number, colony
     state.direction = escapeDirection(world, actor, threat);
     // Reverse while still facing the threat; once already facing away, keep swimming away.
     const facingThreat = Math.cos(actor.heading) * (threat.x - actor.x) + Math.sin(actor.heading) * (threat.y - actor.y) > 0;
-    activate = (ability?.effect === 'glide' || (ability?.effect === 'reverse' && (facingThreat || threat.ability?.targetId === actor.id))) && !abilityBlock(world, actor);
+    activate = (ability?.effect === 'glide' || (ability?.effect === 'discharge' && (facingThreat || threat.ability?.targetId === actor.id))) && !abilityBlock(world, actor);
   } else {
     const neighbors = profile.hunt ? [world.player, ...world.organisms].filter(p => p !== actor && p.alive && !sameColony(actor, p) && distance(p) <= profile.vision)
       .sort((a, b) => distance(a) - distance(b) || a.id.localeCompare(b.id)) : [];
