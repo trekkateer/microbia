@@ -127,7 +127,7 @@ export class PondRenderer {
     }
   }
 
-  render(previous: WorldSnapshot, current: WorldSnapshot, alpha: number, camera: Camera, delta: number): void {
+  render(previous: WorldSnapshot, current: WorldSnapshot, alpha: number, camera: Camera, delta: number, hiddenFood?: ReadonlySet<number>): void {
     current = this.divisionAnimations.update(current, alpha, delta);
     const dividing = this.divisionAnimations.activeIds;
     if (dividing.size) {
@@ -296,11 +296,11 @@ export class PondRenderer {
       this.pulse.circle(point.x, point.y, mix(old.radius, cell.radius) * (1.08 + age * 0.6))
         .stroke({ color, alpha: (1 - age / 0.65) * 0.3, width: 1 });
     }
-    if (this.lastNutrientTick !== current.tick) {
+    if (this.lastNutrientTick !== current.tick || hiddenFood) {
       for (let i = 0; i < current.foodParticles.length; i++) {
         const food = current.foodParticles[i];
         const sprite = this.nutrientSprites[i];
-        sprite.visible = food.availableAtTick <= current.tick;
+        sprite.visible = food.availableAtTick <= current.tick && !hiddenFood?.has(food.id);
         sprite.position.set(food.x, food.y);
       }
       this.lastNutrientTick = current.tick;

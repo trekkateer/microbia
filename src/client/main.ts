@@ -12,6 +12,7 @@ import { roomFromSearch, selectionHref, SPECIES_STORAGE_KEY, NAME_STORAGE_KEY } 
 import { createLeaderboard } from './ui/leaderboard';
 import { MovementPrediction } from './movement-prediction';
 import { idleCommand } from '../sim/commands';
+import { FoodPrediction } from './food-prediction';
 
 async function start(): Promise<void> {
   const arena = arenas['pond-water'];
@@ -63,10 +64,11 @@ async function start(): Promise<void> {
   hud.respawn.addEventListener('click', () => { input.respawn(); app.canvas.focus(); });
   const clock = new FixedStepClock();
   const prediction = new MovementPrediction(arena, organisms);
+  const foodPrediction = new FoodPrediction(organisms, nutrition);
   let pendingCommand = idleCommand();
   let skipNextFrame = false;
   document.addEventListener('visibilitychange', () => {
-    input.reset(); clock.reset(); prediction.reset(); pendingCommand = idleCommand(); previous = current; skipNextFrame = true;
+    input.reset(); clock.reset(); prediction.reset(); foodPrediction.reset(); pendingCommand = idleCommand(); previous = current; skipNextFrame = true;
     network.send({ direction: { x: 0, y: 0 } });
     current = network.state; previous = current; networkBlend = 0;
   });
@@ -93,7 +95,10 @@ async function start(): Promise<void> {
     let presentation = { previous, current };
     if (network.connected && network.appliedSequence !== undefined) presentation = prediction.render(previous, current, network.playerId, network.appliedSequence, command, fraction, delta, network.stateAge);
     else prediction.reset();
-    renderer.render(presentation.previous, presentation.current, Math.min(1, networkBlend / (2 / 30)), camera, delta);
+    const hiddenFood = network.connected && network.appliedSequence !== undefined
+      ? foodPrediction.update(current, presentation.current, network.playerId, delta, network.stateAge) : undefined;
+    if (!hiddenFood) foodPrediction.reset();
+    renderer.render(presentation.previous, presentation.current, Math.min(1, networkBlend / (2 / 30)), camera, delta, hiddenFood);
     if (performance.now() - lastStatusAt >= 250) {
       app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status + ' | FPS ' + Math.round(ticker.FPS);
       lastStatusAt = performance.now();
