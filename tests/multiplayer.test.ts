@@ -67,7 +67,7 @@ describe('authoritative multiplayer pond', () => {
     room.leave('a');
     expect(room.state('b').organisms.some(p => p.kind === 'ai' && p.alive)).toBe(true);
   });
-  it('moves owners independently, inherits ownership on division, isolates rooms and removes disconnected colonies', () => {
+  it('moves owners independently, inherits ownership on division, isolates rooms and hands disconnected colonies to bots', () => {
     const room = new Room('one'), other = new Room('two');
     room.join('a', 'secret-a', 'amoeba-proteus'); room.join('b', 'secret-b', 'paramecium-caudatum');
     const a = room.world.organisms.find(p => p.ownerId === 'a')!, b = room.world.organisms.find(p => p.ownerId === 'b')!;
@@ -84,6 +84,7 @@ describe('authoritative multiplayer pond', () => {
     killOrganism(room.world, a, 'test', 30); room.advance();
     expect(room.state('a').player.alive).toBe(true);
     room.leave('a'); expect(room.world.organisms.some(p => p.ownerId === 'a')).toBe(false);
+    expect(room.world.organisms.find(p => p.parentId === a.id)).toMatchObject({ kind: 'ai', alive: true });
     expect([...room.clients.keys()]).toEqual(['b']);
     expect(room.world.organisms.some(p => p.ownerId === 'b' && p.alive)).toBe(true);
   });
@@ -118,4 +119,5 @@ it('Didinium can fund repeated hunts without grazing or free biomass rewards', (
   expect(a.alive).toBe(true); expect(a.reserves.energy).toBeGreaterThan(10);
   expect(didinium.diet).toHaveLength(0); expect(didiniumMetabolism.upkeepPerSecond).toBeGreaterThan(0);
 });
+
 

@@ -73,3 +73,44 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   assert.equal((await fetch(base + '/api/events?' + new URLSearchParams(fallback))).status, 403);
 });
 
+test('both socket loss and explicit resignation hand existing cells to bots for other players', { timeout: 20000 }, async t => {
+  const child = spawn(process.execPath, ['dist-server/main.js'], { env: { ...process.env, PORT: '0', HOST: '127.0.0.1' }, stdio: ['ignore', 'pipe', 'pipe'] });
+  t.after(() => child.kill());
+  const base = await new Promise((resolve, reject) => {
+    child.on('error', reject);
+    child.stdout.on('data', data => { const match = data.toString().match(/localhost:(\d+)/); if (match) resolve('http://127.0.0.1:' + match[1]); });
+    child.on('exit', code => reject(new Error('Server exited: ' + code)));
+  });
+  const join = async () => (await fetch(base + '/api/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room: 'handoff', speciesId: 'paramecium-caudatum', name: 'River' }) })).json();
+  const connect = session => {
+    const ws = new WebSocket(base.replace('http:', 'ws:') + '/api/socket?' + new URLSearchParams(session));
+    t.after(() => ws.terminate()); return ws;
+  };
+  const observerSession = await join(), observer = connect(observerSession);
+  const packets = []; observer.on('message', raw => packets.push(JSON.parse(raw)));
+  await once(observer, 'open');
+  for (const mode of ['socket-loss', 'resignation']) {
+    const session = await join(), ws = connect(session);
+    const firstMessage = once(ws, 'message'); await once(ws, 'open');
+    const first = JSON.parse((await firstMessage)[0].toString());
+    const id = first.own[0].id, colony = first.own[0].colonyId;
+    const closed = once(ws, 'close');
+    if (mode === 'socket-loss') ws.terminate();
+    else assert.equal((await fetch(base + '/api/leave', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(session) })).status, 200);
+    await closed;
+    const deadline = performance.now() + 5000;
+    let bot;
+    while (!bot && performance.now() < deadline) {
+      bot = packets.flatMap(p => p.actors ?? []).find(p => p[0] === id && p[3] === 'ai');
+      if (!bot) await new Promise(resolve => setTimeout(resolve, 30));
+    }
+    assert.ok(bot, mode + ' must preserve the actor as a bot');
+    assert.equal(bot[2], null); assert.equal(bot[4], colony); assert.equal(bot[13], true);
+    assert.ok(packets.every(p => p.own?.every(p => p.ownerId === observerSession.id)));
+    assert.equal((await fetch(base + '/api/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...session, sequence: 99, command: { direction: { x: 1, y: 0 } } }) })).status, 403);
+  }
+  const lobby = await (await fetch(base + '/api/lobby')).json();
+  assert.equal(lobby.find(room => room.id === 'handoff').players, 1);
+});
+
+

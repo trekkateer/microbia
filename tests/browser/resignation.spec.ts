@@ -10,11 +10,13 @@ test('resignation blocks the old HUD and offers a fresh run in the same room', a
     document.querySelector('#app')!.replaceChildren(viewport);
     showResignation(viewport, '2', 'Connection lost. Your run has ended.');
   });
-  const dialog = page.getByRole('alertdialog', { name: 'You resigned.' });
+  const dialog = page.getByRole('alertdialog', { name: 'You left the pond.' });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText('Connection lost. Your run has ended.');
+  await expect(dialog).toContainText('A bot takes over any surviving cells');
   const restart = dialog.getByRole('link', { name: 'Start a new run' });
   await expect(restart).toHaveAttribute('href', '/?room=2');
   await expect(restart).toBeFocused();
   await expect(page.getByRole('button', { name: 'Respawn' })).toHaveCount(0);
 });
+

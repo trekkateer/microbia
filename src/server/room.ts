@@ -53,8 +53,19 @@ export class Room {
     client.command = { ...(latest ? command : client.command), activate: command.activate || client.command.activate, reproduce: command.reproduce || client.command.reproduce, respawn: command.respawn || client.command.respawn };
     client.lastInput = this.world.tick;
   }
-  leave(id: string): void {
+  leave(id: string, takeover = true): void {
+    const client = this.clients.get(id);
+    if (!client) return;
     this.clients.delete(id);
+    if (takeover) for (const actor of this.world.organisms) {
+      if (actor.ownerId !== id || !actor.alive) continue;
+      const definition = this.world.roster[actor.speciesId];
+      actor.kind = 'ai'; actor.ownerId = undefined;
+      actor.ai = { profileId: definition.reproduction?.offspringAi ?? 'forager', mode: 'wander', direction: { x: 0, y: 0 }, decisionAt: this.world.tick, wanderAt: 0, wanderAngle: actor.heading, targetId: null };
+      this.botNames.set(founderId(actor.colonyId), client.name);
+    }
+    // Only dead cells (or abandoned, never-connected joins) are removed.
+    // Existing captures remain valid when a living target becomes a bot.
     const removed = new Set(this.world.organisms.filter(p => p.ownerId === id).map(p => p.id));
     this.world.organisms = this.world.organisms.filter(p => p.ownerId !== id);
     for (const p of this.world.organisms) if (p.ability?.targetId && removed.has(p.ability.targetId)) p.ability = null;
@@ -108,4 +119,5 @@ export function parseCommand(value: unknown): MoveCommand {
   const direction = vector(v.direction), length = Math.max(1, Math.hypot(direction.x, direction.y));
   return { direction: { x: direction.x / length, y: direction.y / length }, target: v.target === undefined ? undefined : vector(v.target), activate: v.activate === true, reproduce: v.reproduce === true, respawn: v.respawn === true };
 }
+
 

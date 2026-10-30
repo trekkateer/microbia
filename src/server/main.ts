@@ -27,7 +27,7 @@ const server = createServer(async (req, res) => {
       if (!rooms.has(name)) { if (rooms.size >= 16) throw new Error('Server room limit reached'); rooms.set(name, new Room(name)); }
       const room = rooms.get(name)!, id = randomUUID(), token = randomUUID();
       room.join(id, token, String(body.speciesId), typeof body.name === 'string' ? body.name : '');
-      const timer = setTimeout(() => { if (!streams.has(token)) cleanup(room, id); }, 10000); timer.unref();
+      const timer = setTimeout(() => { if (!streams.has(token)) cleanup(room, id, false); }, 10000); timer.unref();
       return json(200, { id, token, room: name });
     }
     if (url.pathname === '/api/events' && req.method === 'GET') {
@@ -95,7 +95,7 @@ async function bodyOf(req: import('node:http').IncomingMessage): Promise<Record<
   let data = ''; for await (const chunk of req) { data += chunk; if (data.length > 2048) throw new Error('Request too large'); }
   return JSON.parse(data);
 }
-function cleanup(room: Room, id: string) { room.leave(id); if (!room.clients.size && rooms.get(room.id) === room) rooms.delete(room.id); }
+function cleanup(room: Room, id: string, takeover = true) { room.leave(id, takeover); if (!room.clients.size && rooms.get(room.id) === room) rooms.delete(room.id); }
 let rateStarted = performance.now(), rateTicks = 0;
 const simulationTimer = setInterval(() => {
   const started = performance.now();
@@ -137,3 +137,4 @@ server.listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '0.0.0.0', (
   const address = server.address();
   console.log(`microbia multiplayer: http://localhost:${typeof address === 'object' && address ? address.port : process.env.PORT ?? 3000}`);
 });
+
