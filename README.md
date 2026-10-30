@@ -1,4 +1,4 @@
-# microbia.gg
+# microbia
 
 **M4 + reproduction are implemented:** all five Pond Water species are playable. Grow, press R to divide, and control both daughters together. Amoeba attacks nearby prey along its swimming direction; Didinium retains pointer aiming. Photosynthesis, environmental zones, single-celled AI, solid collisions and death/respawn remain active. An M7 multiplayer prototype is now available; see the multiplayer instructions below. See [PLAN.md](PLAN.md).
 
@@ -48,7 +48,7 @@ The server closes live streams on SIGTERM/SIGINT and exposes `/healthz` for host
 readiness checks. The build explicitly installs development dependencies because
 TypeScript and Vite are required even when `NODE_ENV=production`.
 
-For a custom domain, first verify the generated URL, then add `microbia.gg` in
+For a custom domain, first verify the generated URL, then add `microbia.us` in
 Render's custom-domain settings and apply the DNS records Render provides. Do not
 change DNS until domain ownership and the current records have been checked.
 

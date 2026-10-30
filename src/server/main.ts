@@ -123,5 +123,5 @@ process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 server.listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '0.0.0.0', () => {
   const address = server.address();
-  console.log(`microbia.gg multiplayer: http://localhost:${typeof address === 'object' && address ? address.port : process.env.PORT ?? 3000}`);
+  console.log(`microbia multiplayer: http://localhost:${typeof address === 'object' && address ? address.port : process.env.PORT ?? 3000}`);
 });

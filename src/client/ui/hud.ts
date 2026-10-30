@@ -17,7 +17,7 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
   const dietNote = producer ? `Stay in pale green nutrient patches to absorb dissolved resources. Light powers photosynthesis.${species.defense ? ' Silicate is needed for new shell material.' : ' Darkness slowly drains mass.'}` : species.diet.length ? '' : 'Your diet: Paramecium. Touch prey to feed; Space speeds the hunt.';
   root.innerHTML = `
     <header class="site-header">
-      <a class="brand" href="./" aria-label="microbia.gg home"><span class="brand-cell" aria-hidden="true"></span>microbia<span class="brand-suffix">.gg</span></a>
+      <a class="brand" href="./" aria-label="microbia home"><span class="brand-cell" aria-hidden="true"></span>microbia</a>
       <div class="build-tag"><span></span> LIVING POND <b>M4</b></div>
     </header>
     <main class="viewport" aria-label="Pond Water game">

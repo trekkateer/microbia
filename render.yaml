@@ -1,7 +1,7 @@
 # Single process: rooms and sessions are held in memory.
 services:
   - type: web
-    name: microbia-gg
+    name: microbia
     runtime: node
     plan: free
     region: ohio

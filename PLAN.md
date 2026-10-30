@@ -1,4 +1,4 @@
-# microbia.gg - implementation plan
+# microbia - implementation plan
 
 ## Scope and game loop
 

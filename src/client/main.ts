@@ -102,4 +102,4 @@ async function start(): Promise<void> {
   });
 }
 
-start().catch(error => { console.error('Unable to start microbia.gg', error); });
+start().catch(error => { console.error('Unable to start microbia', error); });
