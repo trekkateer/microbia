@@ -24,6 +24,10 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   assert.equal(arena.status, 200);
   const arenaHtml = await arena.text();
   assert.notEqual(homeHtml, arenaHtml, 'home and play must serve distinct page entries');
+  const speciesIndex = await fetch(base + '/species?room=2');
+  assert.equal(speciesIndex.status, 200);
+  assert.match(await speciesIndex.text(), /Species index/);
+  assert.equal((await fetch(base + '/species/')).status, 200);
   assert.match(arenaHtml, /Play microbia/);
   assert.equal((await fetch(base + '/play?room=2')).status, 200);
   const defaultArena = await fetch(base + '/play', { redirect: 'manual' });
@@ -112,5 +116,3 @@ test('both socket loss and explicit resignation hand existing cells to bots for 
   const lobby = await (await fetch(base + '/api/lobby')).json();
   assert.equal(lobby.find(room => room.id === 'handoff').players, 1);
 });
-
-

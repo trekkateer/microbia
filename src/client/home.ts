@@ -8,7 +8,9 @@ async function start() {
   const room = roomFromSearch(location.search);
   let savedName = '';
   try { savedName = sessionStorage.getItem(NAME_STORAGE_KEY) ?? ''; } catch { /* Optional name remains blank. */ }
-  const organism = await chooseSpecies(root, arenas['pond-water'], species, room, savedName);
+  const detailed = location.pathname === '/species' || location.pathname === '/species/';
+  document.title = detailed ? 'Species index · microbia' : 'microbia · Pond Water';
+  const organism = await chooseSpecies(root, arenas['pond-water'], species, room, savedName, detailed);
   const name = root.querySelector<HTMLInputElement>('#player-name')!.value.trim();
   const selectedRoom = root.querySelector<HTMLInputElement>('#room-name')!.value;
   let href = playHref(selectedRoom);

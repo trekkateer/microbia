@@ -58,7 +58,8 @@ const server = createServer(async (req, res) => {
       url.searchParams.set('room', DEFAULT_ROOM);
       res.writeHead(302, { Location: '/play?' + url.searchParams, 'Cache-Control': 'no-store' }); res.end(); return;
     }
-    const file = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : play ? '/play/index.html' : url.pathname));
+    const index = url.pathname === '/species' || url.pathname === '/species/';
+    const file = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : play ? '/play/index.html' : index ? '/species/index.html' : url.pathname));
     if (!file.startsWith(root + sep)) return json(403, { error: 'Forbidden' });
     const data = await readFile(file);
     const types: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' };
@@ -137,4 +138,3 @@ server.listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? '0.0.0.0', (
   const address = server.address();
   console.log(`microbia multiplayer: http://localhost:${typeof address === 'object' && address ? address.port : process.env.PORT ?? 3000}`);
 });
-

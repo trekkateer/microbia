@@ -8,17 +8,19 @@ export default defineConfig({
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         if (req.url && /^\/play\/?(?:\?|$)/.test(req.url)) req.url = req.url.replace(/^\/play\/?/, '/play/index.html');
+        if (req.url && /^\/species\/?(?:\?|$)/.test(req.url)) req.url = req.url.replace(/^\/species\/?/, '/species/index.html');
         next();
       });
     },
     configurePreviewServer(server) {
       server.middlewares.use((req, _res, next) => {
         if (req.url && /^\/play\/?(?:\?|$)/.test(req.url)) req.url = req.url.replace(/^\/play\/?/, '/play/index.html');
+        if (req.url && /^\/species\/?(?:\?|$)/.test(req.url)) req.url = req.url.replace(/^\/species\/?/, '/species/index.html');
         next();
       });
     },
   }],
-  build: { rolldownOptions: { input: { home: resolve('index.html'), play: resolve('play/index.html') } } },
+  build: { rolldownOptions: { input: { home: resolve('index.html'), play: resolve('play/index.html'), species: resolve('species/index.html') } } },
   server: { proxy: { '/api': { target: 'http://127.0.0.1:3000', ws: true } } },
   test: { include: ['tests/**/*.test.ts'], environment: 'node' },
 });

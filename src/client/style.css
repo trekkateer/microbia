@@ -212,3 +212,39 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 .diagnostics-label::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #8ebc91; box-shadow: 0 0 8px #8ebc9140; }
 .diagnostics-values { color: #8fa99c; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 @media (max-width: 680px) { .species-card.organism-panel[data-compact="true"] { width: min(260px, calc(100% - 32px)); } .site-footer.arena-diagnostics { gap: 6px; align-items: flex-start; flex-direction: column; } .diagnostics-values { text-align: left; font-size: 8px; } }
+/* Homepage selection and species index. */
+.selection-nav { display: flex; align-items: center; gap: 22px; margin-left: auto; }
+.selection-nav a { color: #526d60; font-size: 12px; text-decoration: none; padding: 8px 0; border-bottom: 1px solid transparent; }
+.selection-nav a:hover, .selection-nav a[aria-current="page"] { color: #173b38; border-bottom-color: #62856b; }
+.selection-nav a:focus-visible, .room-lobby button:focus-visible, .roster-card button:focus-visible { outline: 2px solid #c4d9b5; outline-offset: 4px; }
+.home-selection { padding: 30px 28px 20px; }
+.join-form { margin: 0; }
+.join-settings { max-width: 760px; min-width: 0; margin: 24px auto 0; padding: 18px 22px 14px; border: 1px solid #a4c7a433; border-radius: 12px; background: #08282999; text-align: left; }
+.join-settings legend { padding: 0 9px; color: #afc9ae; font-size: 10px; letter-spacing: 1.7px; text-transform: uppercase; }
+.join-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.join-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.join-field > span { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: #d5e3ca; }
+.join-field > span small { font-size: 8px; letter-spacing: 1.3px; color: #8da99a; }
+.join-field input { appearance: none; width: 100%; min-width: 0; border: 1px solid #a4c7a43d; border-radius: 7px; padding: 11px 12px; background: #061d20; color: #e3ead9; font: inherit; font-size: 15px; transition: border-color .15s, box-shadow .15s; }
+.join-field input::placeholder { color: #718f83; }
+.join-field input:hover { border-color: #a4c7a480; }
+.join-field input:focus { outline: none; border-color: #bdd6a9; box-shadow: 0 0 0 3px #bdd6a91c; }
+.join-field input:user-invalid { border-color: #e1977e; }
+.join-field > small { color: #8da99a; font-size: 10px; line-height: 1.5; }
+.room-lobby { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.room-lobby:empty { display: none; }
+.room-lobby button { border: 1px solid #a4c7a433; border-radius: 20px; color: #afc8b7; background: #b5d1ab0a; padding: 6px 10px; font-size: 10px; }
+.room-lobby button:hover, .room-lobby button[aria-pressed="true"] { background: #b5d1ab20; border-color: #a4c7a47a; color: #e0edce; }
+.lobby-status { color: #8da99a; font-size: 10px; line-height: 1.5; margin: 10px 0 0; }
+.roster-compact { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; max-width: 1160px; margin-top: 16px; }
+.roster-compact .roster-card { padding: 16px 14px; border-radius: 12px; }
+.roster-compact .roster-art { height: 68px; transform: scale(.65); margin: -4px 0; }
+.roster-compact .roster-card h2 { font-size: 23px; margin: 8px 0 4px; }
+.roster-compact .scientific-name { font-size: 11px; }
+.roster-compact .roster-card p { font-size: 11px; line-height: 1.6; min-height: 54px; flex: 1; margin: 12px 0 0; }
+.roster-compact .roster-card button { padding: 10px 5px; font-size: 11px; }
+.selection-controls { margin-top: 20px; }
+.selection-controls span { padding: 0 8px; color: #527b6e; }
+@media (max-width: 1100px) { .roster-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 800px; } }
+@media (max-width: 680px) { .home-selection, .species-index { padding: 24px 16px 20px; } .selection-nav { gap: 14px; } .selection-nav a { font-size: 11px; } .join-settings { padding: 14px; margin-top: 20px; } .join-fields { grid-template-columns: 1fr; gap: 16px; } .join-field input { font-size: 16px; } .roster-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .roster-compact .roster-card { padding: 12px; } .roster-compact .roster-card h2 { font-size: 20px; } .selection-controls { line-height: 1.9; } }
+@media (max-width: 380px) { .roster-compact { grid-template-columns: 1fr; } }
