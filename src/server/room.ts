@@ -10,7 +10,7 @@ const founderId = (colonyId: string) => colonyId.includes(':') ? colonyId.slice(
 
 export class Room {
   readonly world = createWorld(arenas['pond-water'], species['amoeba-proteus']);
-  readonly clients = new Map<string, { token: string; name: string; command: MoveCommand; lastInput: number; lastSequence: number; seenInputs: Set<number> }>();
+  readonly clients = new Map<string, { token: string; name: string; command: MoveCommand; lastInput: number; lastSequence: number; appliedSequence: number; seenInputs: Set<number> }>();
   private readonly botNames = new Map<string, string>();
   constructor(readonly id: string) {
     this.world.player.alive = false; this.world.player.kind = 'fixture';
@@ -35,7 +35,7 @@ export class Room {
     actor.protectedUntil = this.world.tick + 90;
     this.world.organisms.push(actor);
     const displayName = name.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || `Player ${id.slice(0, 6)}`;
-    this.clients.set(id, { token, name: displayName, command: { direction: { x: 0, y: 0 } }, lastInput: this.world.tick, lastSequence: -1, seenInputs: new Set() });
+    this.clients.set(id, { token, name: displayName, command: { direction: { x: 0, y: 0 } }, lastInput: this.world.tick, lastSequence: -1, appliedSequence: -1, seenInputs: new Set() });
   }
   input(id: string, sequence: unknown, value: unknown): void {
     const client = this.clients.get(id);
@@ -70,7 +70,7 @@ export class Room {
     });
     const commands = new Map([...this.clients].map(([id, c]) => [id, this.world.tick - c.lastInput > 15 ? { direction: { x: 0, y: 0 } } : c.command]));
     step(this.world, { direction: { x: 0, y: 0 } }, commands);
-    for (const c of this.clients.values()) c.command = { ...c.command, activate: false, reproduce: false, respawn: false };
+    for (const c of this.clients.values()) { c.appliedSequence = c.lastSequence; c.command = { ...c.command, activate: false, reproduce: false, respawn: false }; }
   }
   state(id: string): WorldSnapshot {
     const state = snapshot(this.world);

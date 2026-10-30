@@ -240,7 +240,7 @@ Didinium balance: base speed 190 (minimum 120), contact capture 1.8 seconds, str
 
 Original prototype validation: 136 simulation tests passed, including a 20-player room scenario, independent controls, rival-player predation, owner-scoped respawn, colony inheritance, disconnect cleanup, room capacity/isolation and input validation. Client and server production builds pass. The browser suite includes a two-player integration check, but local socket connections are blocked by the execution environment (EACCES), so browser and real network load verification remain outstanding. Run `npm test` and `npm run test:browser` locally with the multiplayer server running.
 
-Prototype limitations: actor snapshots may still become bandwidth-heavy with very large populations; no client prediction, reconnect recovery, accounts or durable statistics. The leaderboard is live biomass. This is a local/LAN playtest prototype, with public hosting and production hardening still pending.
+Prototype limitations: actor snapshots may still become bandwidth-heavy with very large populations; no reconnect recovery, accounts or durable statistics. The leaderboard is live biomass. This is a local/LAN playtest prototype, with public hosting and production hardening still pending.
 
 
 ### Multiplayer latency improvements
@@ -282,3 +282,26 @@ The arena sidebar shows the ten highest human and bot colonies by total living b
 
 The arena no longer displays a Food in this drop guide. Your Organism now contains biomass, growth, energy, hunger, feeding feedback, abilities, division controls and nutrient inventory in one responsive panel. The leaderboard stays in its own sidebar.
 
+
+### Responsive steering
+
+Owned cells predict ordinary steering locally using shared movement/current rules.
+The server tags snapshots with the last input sequence actually simulated; the
+client discards acknowledged inputs and replays only the remaining steering.
+Small position corrections blend over about 80ms. Detailed nearby membrane
+checks and map bounds constrain the preview, which is capped at 250ms and freezes
+when snapshots become stale. Death, respawn, division and authoritative ability
+transitions reset prediction. Food, biomass, combat and reproduction remain
+server-controlled. Other players and bots continue using snapshot interpolation.
+
+Input is sampled every rendered frame; pending buttons are retained until the
+next 30Hz send. Authenticated WebSocket input packets omit redundant session
+credentials, and status DOM updates run at 4Hz. The status includes snapshot age
+and warns when waiting for the server. Prediction improves input response; it
+does not reduce internet RTT or prevent a CPU-limited server from falling behind.
+
+Regression coverage includes a simulated 200ms round trip, immediate pre-reply
+movement and convergence after stopping, acknowledgement consistency, stalls,
+life changes and membrane/wall checks. The full 170-test suite and both builds
+pass; live transport checks verify applied-input acknowledgements. Browser visual
+verification still depends on an environment where Edge can launch.

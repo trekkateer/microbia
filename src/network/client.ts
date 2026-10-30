@@ -10,6 +10,7 @@ export async function connectPond(speciesId: string, room: string, name = '') {
   let latest: WorldSnapshot | null = null, disconnected = false, players = 0;
   let leaderboard: LeaderboardEntry[] = [];
   let rtt = 0, lastPing = -Infinity, tickHz = 30, tickMs = 0;
+  let lastStateAt = performance.now(), appliedSequence: number | undefined;
   let socket: WebSocket | undefined, events: EventSource | undefined;
   const decoder = new PondDecoder();
   let ready!: () => void, failed!: (error: Error) => void;
@@ -20,7 +21,10 @@ export async function connectPond(speciesId: string, room: string, name = '') {
     try {
       const data = JSON.parse(event.data);
       if (data.kind === 'ack') { rtt = Math.max(0, performance.now() - data.sentAt); return; }
+      if (latest && data.tick <= latest.tick) return;
       latest = decoder.decode(data); players = data.players; leaderboard = data.leaderboard;
+      lastStateAt = performance.now();
+      appliedSequence = Number.isSafeInteger(data.appliedSequence) ? data.appliedSequence : undefined;
       if (data.timing) { tickHz = data.timing.tickHz; tickMs = data.timing.tickMs; }
       ready();
     } catch { lost(); socket?.close(); }
@@ -59,9 +63,13 @@ export async function connectPond(speciesId: string, room: string, name = '') {
     get state() { return latest!; },
     get leaderboard() { return leaderboard; },
     get playerId() { return session.id as string; },
+    get appliedSequence() { return appliedSequence; },
+    get stateAge() { return (performance.now() - lastStateAt) / 1000; },
+    get connected() { return !disconnected; },
     get status() {
       if (disconnected) return 'Disconnected - reload to rejoin';
-      const health = (socket ? 'WebSocket' : 'HTTP fallback') + ' | RTT ' + (rtt ? Math.round(rtt) + ' ms' : 'measuring') + ' | Server ' + tickHz.toFixed(0) + ' Hz / ' + tickMs.toFixed(1) + ' ms';
+      const age = performance.now() - lastStateAt;
+      const health = (socket ? 'WebSocket' : 'HTTP fallback') + ' | RTT ' + (rtt ? Math.round(rtt) + ' ms' : 'measuring') + ' | State ' + Math.round(age) + ' ms' + (age > 500 ? ' (waiting for server)' : '') + ' | Server ' + tickHz.toFixed(0) + ' Hz / ' + tickMs.toFixed(1) + ' ms';
       return room + ' | ' + players + '/20 players | ' + health;
     },
     send(command: MoveCommand) {
@@ -70,12 +78,15 @@ export async function connectPond(speciesId: string, room: string, name = '') {
       const outgoing = queued; queued = { direction: command.direction, target: command.target };
       const now = performance.now(), sentAt = now - lastPing >= 1000 ? now : undefined;
       if (sentAt !== undefined) lastPing = now;
-      const body = JSON.stringify({ ...session, sequence: sequence++, command: outgoing, sentAt });
-      if (socket) { socket.send(body); return; }
+      const outgoingSequence = sequence++;
+      const input = { sequence: outgoingSequence, command: outgoing, sentAt };
+      const body = JSON.stringify(socket ? input : { ...session, ...input });
+      if (socket) { socket.send(body); return outgoingSequence; }
       inFlight++;
       void fetch('/api/input', { signal: AbortSignal.timeout(5000), method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
         .then(async response => { if (!response.ok) throw new Error('Input rejected'); const ack = await response.json(); if (Number.isFinite(ack.sentAt)) rtt = Math.max(0, performance.now() - ack.sentAt); })
         .catch(lost).finally(() => { inFlight--; });
+      return outgoingSequence;
     },
   };
 }

@@ -1,3 +1,4 @@
+import { movementDirection } from './movement';
 import type { MoveCommand } from './commands';
 import { safeDirection } from './commands';
 import type { PlayerState, Vec2, World } from './types';
@@ -47,26 +48,7 @@ export function step(world: World, command: MoveCommand, remoteCommands?: Readon
   const movements = new Map<string, Vec2>();
   for (const p of actors) {
     const definition = p === world.player ? world.species : world.roster[p.speciesId];
-    const ability = definition.activeId ? abilities[definition.activeId] : null;
-    let direction = safeDirection(commands.get(p.id)!.direction);
-    if (p.stunnedUntil > world.tick) direction = { x: 0, y: 0 };
-    else if (p.ability && p.ability.until > world.tick && p.ability.effect !== 'capture' && p.ability.effect !== 'discharge' && ability) {
-      direction = { x: p.ability.direction.x * ability.speed / p.speed, y: p.ability.direction.y * ability.speed / p.speed };
-      if (p.ability.effect === 'phototaxis' && Math.hypot(direction.x, direction.y) > 0) {
-        const target = Math.atan2(direction.y, direction.x);
-        const turn = Math.atan2(Math.sin(target - p.heading), Math.cos(target - p.heading));
-        const heading = p.heading + Math.max(-definition.turnRate * FIXED_DT, Math.min(definition.turnRate * FIXED_DT, turn));
-        const magnitude = Math.hypot(direction.x, direction.y);
-        direction = { x: Math.cos(heading) * magnitude, y: Math.sin(heading) * magnitude };
-      }
-    }
-    else if (Math.hypot(p.velocity.x, p.velocity.y) > 0.01 && Math.hypot(direction.x, direction.y) > 0) {
-      const previousHeading = p.heading, targetHeading = Math.atan2(direction.y, direction.x);
-      const turn = Math.atan2(Math.sin(targetHeading - previousHeading), Math.cos(targetHeading - previousHeading));
-      const heading = previousHeading + Math.max(-definition.turnRate * FIXED_DT, Math.min(definition.turnRate * FIXED_DT, turn));
-      const magnitude = Math.hypot(direction.x, direction.y);
-      direction = { x: Math.cos(heading) * magnitude, y: Math.sin(heading) * magnitude };
-    }
+    const direction = movementDirection(p, commands.get(p.id)!.direction, definition, world.tick, FIXED_DT);
     const moving = Math.hypot(direction.x, direction.y) > 0.001;
     if (moving) p.heading = Math.atan2(direction.y, direction.x);
     p.stretch += ((moving ? 0.1 : 0) - p.stretch) * (1 - Math.exp(-FIXED_DT * 8));

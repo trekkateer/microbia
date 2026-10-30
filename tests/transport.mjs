@@ -38,6 +38,7 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   const until = async predicate => { while (!frames.some(predicate)) await new Promise(resolve => pending.push(resolve)); return frames.find(predicate); };
   await once(ws, 'open');
   const first = await until(p => p.resetFood === true);
+  assert.equal(first.appliedSequence, -1);
   assert.ok(first.leaderboard.length <= 10);
   assert.ok(first.leaderboard.some(p => p.bot && p.name));
   assert.ok(first.leaderboard.every(p => p.speciesId && p.name));
@@ -49,6 +50,7 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   }
   assert.ok((await until(p => p.kind === 'ack')).sentAt === 123);
   await until(p => p.own?.some(p => p.x > x + 5));
+  await until(p => p.appliedSequence >= 0 && p.own?.some(p => p.x > x + 5));
   const rejected = await fetch(base + '/api/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...session, token: 'wrong', sequence: 9, command: { direction: { x: 0, y: 0 } } }) });
   assert.equal(rejected.status, 403);
   ws.close(); await once(ws, 'close');

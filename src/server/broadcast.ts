@@ -20,11 +20,12 @@ export class RoomBroadcast {
     const delta = JSON.stringify(changes);
     let fullFood: string | undefined;
     const ownJson = new Map<string, string>();
+    const appliedSequences = new Map([...room.clients].map(([id, client]) => [id, client.appliedSequence]));
     return (id, full) => {
       let own = ownJson.get(id);
       if (!own) { own = JSON.stringify(owned.get(id) ?? []); ownJson.set(id, own); }
       if (full && !fullFood) fullFood = JSON.stringify(room.world.foodParticles);
-      return `${common},"own":${own},"resetFood":${full},"food":${full ? fullFood : delta}}`;
+      return `${common},"appliedSequence":${appliedSequences.get(id) ?? -1},"own":${own},"resetFood":${full},"food":${full ? fullFood : delta}}`;
     };
   }
 }

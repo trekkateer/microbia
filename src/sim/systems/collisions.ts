@@ -3,12 +3,12 @@ import type { PlayerState, Vec2, World } from '../types';
 
 // Convex envelopes follow the actual membrane (including stretch and rotation).
 // Tiny concave membrane folds remain solid instead of interlocking two cells.
-export function bodyHull(world: World, actor: PlayerState): Vec2[] {
+export function bodyHull(world: Pick<World, 'tick' | 'roster'>, actor: PlayerState): Vec2[] {
   return actorGeometry(world, actor).points.map(p => ({ x: p.x + actor.x, y: p.y + actor.y }));
 }
 
 const shapeGeometries = new Map<string, HullGeometry>();
-function actorGeometry(world: World, actor: PlayerState): HullGeometry {
+function actorGeometry(world: Pick<World, 'tick' | 'roster'>, actor: PlayerState): HullGeometry {
   const shape = world.roster[actor.speciesId].visual.shape;
   const rigid = shape === 'diatom' || shape === 'flagellate';
   const key = rigid ? shape : shape + ':' + world.tick + ':' + (shape === 'amoeboid' ? actor.stretch : 0);

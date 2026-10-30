@@ -10,6 +10,8 @@ import './style.css';
 import { connectPond } from '../network/client';
 import { roomFromSearch, selectionHref, SPECIES_STORAGE_KEY, NAME_STORAGE_KEY } from '../network/room-url';
 import { createLeaderboard } from './ui/leaderboard';
+import { MovementPrediction } from './movement-prediction';
+import { idleCommand } from '../sim/commands';
 
 async function start(): Promise<void> {
   const arena = arenas['pond-water'];
@@ -60,9 +62,11 @@ async function start(): Promise<void> {
   hud.reproduce.addEventListener('click', () => { input.reproduce(); app.canvas.focus(); });
   hud.respawn.addEventListener('click', () => { input.respawn(); app.canvas.focus(); });
   const clock = new FixedStepClock();
+  const prediction = new MovementPrediction(arena, organisms);
+  let pendingCommand = idleCommand();
   let skipNextFrame = false;
   document.addEventListener('visibilitychange', () => {
-    input.reset(); clock.reset(); previous = current; skipNextFrame = true;
+    input.reset(); clock.reset(); prediction.reset(); pendingCommand = idleCommand(); previous = current; skipNextFrame = true;
     network.send({ direction: { x: 0, y: 0 } });
     current = network.state; previous = current; networkBlend = 0;
   });
@@ -71,21 +75,30 @@ async function start(): Promise<void> {
   status.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:20;background:#102820;color:#e2efc8;padding:8px;pointer-events:none'; hud.host.append(status);
   let networkBlend = 0;
   let lastHudTick = -1;
+  let lastStatusAt = -Infinity;
   app.ticker.add(ticker => {
     if (document.hidden) return;
     const delta = skipNextFrame ? 0 : Math.min(ticker.elapsedMS / 1000, 0.25);
     skipNextFrame = false;
-    clock.advance(delta, () => {
-      const command = input.read(camera);
-      network.send(command);
+    const command = input.read(camera);
+    pendingCommand = { ...command, activate: command.activate || pendingCommand.activate, reproduce: command.reproduce || pendingCommand.reproduce, respawn: command.respawn || pendingCommand.respawn };
+    const fraction = clock.advance(delta, () => {
+      prediction.record(network.send(pendingCommand), pendingCommand);
+      pendingCommand = { ...pendingCommand, activate: false, reproduce: false, respawn: false };
     });
     if (network.state.tick !== current.tick) {
       previous = current; current = network.state; networkBlend = 0;
       if (current.player.generation !== previous.player.generation || current.player.alive !== previous.player.alive) { previous = current; input.reset(); }
     }
     networkBlend += delta;
-    renderer.render(previous, current, Math.min(1, networkBlend / (2 / 30)), camera, delta);
-    app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status + ' | FPS ' + Math.round(ticker.FPS);
+    let presentation = { previous, current };
+    if (network.connected && network.appliedSequence !== undefined) presentation = prediction.render(previous, current, network.playerId, network.appliedSequence, command, fraction, delta, network.stateAge);
+    else prediction.reset();
+    renderer.render(presentation.previous, presentation.current, Math.min(1, networkBlend / (2 / 30)), camera, delta);
+    if (performance.now() - lastStatusAt >= 250) {
+      app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status + ' | FPS ' + Math.round(ticker.FPS);
+      lastStatusAt = performance.now();
+    }
     if (current.tick !== lastHudTick) {
       hud.update(current.player, current.tick, current.organisms);
       leaderboard.update(network.leaderboard, network.playerId);

@@ -7,6 +7,7 @@ export function packActor(p: PlayerState) { return [p.id, p.speciesId, p.ownerId
 function unpackActor(p: ReturnType<typeof packActor>) { return { id: p[0], speciesId: p[1], ownerId: p[2], kind: p[3], colonyId: p[4], x: p[5], y: p[6], radius: p[7], mass: p[8], heading: p[9], stretch: p[10], velocity: p[11], speed: p[12], alive: p[13], generation: p[14], divisionCount: p[15], ability: p[16], protectedUntil: p[17], stunnedUntil: p[18], lastAbsorbedTick: p[19], lastFoodId: p[20], eaten: p[21], satiety: p[22], parentId: p[23] ?? null }; }
 export interface LeaderboardEntry { id: string; name?: string; speciesId?: string; mass: number; bot?: boolean }
 export interface PondPacket {
+  appliedSequence?: number;
   tick: number;
   actors: ReturnType<typeof packActor>[];
   own: PlayerState[];
