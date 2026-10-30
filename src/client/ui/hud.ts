@@ -16,7 +16,6 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
   const ability = abilities[species.activeId!];
   const menu = arena.foodSpawns.map(spawn => nutrition.foods[spawn.foodId]).filter(food => species.diet.includes(food.id));
   const producer = !!species.photosynthesis;
-  const dietNote = producer ? `Stay in pale green nutrient patches to absorb dissolved resources. Light powers photosynthesis.${species.defense ? ' Silicate is needed for new shell material.' : ' Darkness slowly drains mass.'}` : species.diet.length ? '' : 'Your diet: Paramecium. Touch prey to feed; Space speeds the hunt.';
   root.innerHTML = `
     <header class="site-header">
       <a class="brand" href="/" aria-label="microbia home"><span class="brand-cell" aria-hidden="true"></span>microbia</a>
@@ -26,12 +25,11 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
       <div id="game"></div>
       <div class="vignette" aria-hidden="true"></div>
       <div class="arena-heading overlay"><div class="eyebrow"><span class="live-dot"></span> FRESHWATER / 01</div><h1></h1><p></p><div class="sandbox-actions"><a href="${selectionUrl}">Change species</a><span id="population"></span></div><p id="environment-status"></p></div>
-      <section class="food-guide overlay" aria-label="Food guide"><div class="eyebrow">FOOD IN THIS DROP</div><ul id="food-legend"></ul>${dietNote ? `<p class="diet-note">${dietNote}</p>` : ''}<p class="zone-key">Gold: light · Indigo: shade<br>Blue arrows: cold current<br>Green rings: dissolved nutrients</p></section>
       <div id="loading" role="status">Bringing the pond into focus…</div>
       <section id="death-panel" class="death-panel" role="region" aria-label="Life ended" hidden><div><div class="eyebrow">THE POND GOES ON</div><h2>A small life ends.</h2><p id="death-reason"></p><p>Return as the same species with fresh reserves.</p><button id="respawn" type="button">Respawn</button><a href="${selectionUrl}">Choose another species</a></div></section>
-      <section class="species-card overlay" aria-label="Your organism"><div class="eyebrow">YOUR ORGANISM</div><h2></h2><p></p><div class="ability-panel"><button id="activate-ability" type="button"><kbd>Space</kbd> ${ability.name}</button><output id="ability-status">Ready</output><small>${Object.entries(ability.costs).map(([id, cost]) => `${cost} ${id}`).join(' + ')} · ${ability.cooldown}s cooldown</small><span id="ability-message"></span></div><details class="kit-details"><summary>${species.passive.name} · passive & weakness</summary><p>${species.passive.description}</p><p>Weakness: ${species.weakness}</p></details><details class="nutrient-inventory"><summary>Absorbed nutrients</summary><ul id="nutrient-inventory" aria-label="Current absorbed nutrients"></ul><p class="inventory-note">Current stock, including food digesting. Amounts fall as nutrients are used. Division shares these resources equally.</p></details></section>
+      <section class="species-card organism-panel overlay" aria-label="Your organism"><div class="eyebrow">YOUR ORGANISM</div><h2></h2><p></p><div class="organism-vitals" role="group" aria-label="Health and growth"><div class="eyebrow">BIOMASS <span id="growth-label">FORAGING</span></div><div class="mass-line"><output id="mass" aria-label="Biomass">25</output><span>mass</span><div class="eaten-count"><output id="eaten" aria-label="Foods eaten">0</output><small>FOODS</small></div></div><div class="growth-track" role="progressbar" aria-label="Growth to maximum mass" aria-valuemin="25" aria-valuemax="225" aria-valuenow="25"><div id="growth-fill"></div></div><div class="energy-row"><span>ENERGY</span><output id="energy" aria-label="Energy level"></output></div><div class="energy-track" role="progressbar" aria-label="Energy reserve"><div id="energy-fill"></div></div><div class="hunger-row"><span>HUNGER</span><output id="hunger" aria-label="Hunger level">100%</output></div><div class="hunger-track" role="progressbar" aria-label="Nourishment" aria-valuemin="0" aria-valuemax="100"><div id="hunger-fill"></div></div><p id="hunger-status"></p><p id="nutrition-status"></p><p id="food-advice"></p><div id="digestion-status"></div></div><div class="ability-panel"><button id="activate-ability" type="button"><kbd>Space</kbd> ${ability.name}</button><output id="ability-status">Ready</output><small>${Object.entries(ability.costs).map(([id, cost]) => `${cost} ${id}`).join(' + ')} · ${ability.cooldown}s cooldown</small><span id="ability-message"></span></div><details class="kit-details"><summary>${species.passive.name} · passive & weakness</summary><p>${species.passive.description}</p><p>Weakness: ${species.weakness}</p></details><details class="nutrient-inventory"><summary>Absorbed nutrients</summary><ul id="nutrient-inventory" aria-label="Current absorbed nutrients"></ul><p class="inventory-note">Current stock, including food digesting. Amounts fall as nutrients are used. Division shares these resources equally.</p></details></section>
       <div class="control-hint overlay"><span>Mouse</span> to steer <i>·</i> <span>W A S D</span> or <span>↑ ← ↓ →</span> to move</div>
-      <section class="growth-card overlay" aria-label="Growth stats"><div class="eyebrow">BIOMASS <span id="growth-label">FORAGING</span></div><div class="mass-line"><output id="mass" aria-label="Biomass">25</output><span>mass</span><div class="eaten-count"><output id="eaten" aria-label="Foods eaten">0</output><small>FOODS</small></div></div><div class="growth-track" role="progressbar" aria-label="Growth to maximum mass" aria-valuemin="25" aria-valuemax="225" aria-valuenow="25"><div id="growth-fill"></div></div><div class="energy-row"><span>ENERGY</span><output id="energy" aria-label="Energy level"></output></div><div class="energy-track" role="progressbar" aria-label="Energy reserve"><div id="energy-fill"></div></div><div class="hunger-row"><span>HUNGER</span><output id="hunger" aria-label="Hunger level">100%</output></div><div class="hunger-track" role="progressbar" aria-label="Nourishment" aria-valuemin="0" aria-valuemax="100"><div id="hunger-fill"></div></div><p id="hunger-status"></p><p id="nutrition-status"></p><p id="food-advice"></p><div id="digestion-status"></div></section>
+      
     </main>
     <footer class="site-footer"><span><span class="footer-dot"></span> LOCAL POND <i>/</i> FIVE SINGLE-CELLED SPECIES</span><span>ONE DROP. A WHOLE WORLD.</span></footer>
   `;
@@ -56,32 +54,6 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
     get('#nutrient-inventory').appendChild(item);
     return { id: nutrient.id, amount, item, relevant };
   });
-  for (const food of menu) {
-    const item = document.createElement('li');
-    const icon = document.createElement('span');
-    icon.className = 'food-symbol';
-    icon.dataset.shape = food.shape;
-    icon.style.setProperty('--food-color', `#${food.color.toString(16).padStart(6, '0')}`);
-    icon.setAttribute('aria-hidden', 'true');
-    const text = document.createElement('span');
-    const name = document.createElement('strong');
-    name.textContent = food.name;
-    const detail = document.createElement('small');
-    detail.textContent = food.summary;
-    text.append(name, detail);
-    item.append(icon, text);
-    get('#food-legend').appendChild(item);
-  }
-  if (producer) {
-    for (const id of Object.keys(species.dissolvedUptake ?? {})) {
-      const item = document.createElement('li');
-      const name = document.createElement('strong'), detail = document.createElement('small');
-      const text = document.createElement('span');
-      name.textContent = nutrition.nutrients[id].name;
-      detail.textContent = id === species.photosynthesis!.input ? 'Carbon + light → organic food' : id === 'silicate' ? 'New silica shell material' : id === 'phosphate' ? 'Phosphorus for growth' : 'Nitrogen for growth';
-      text.append(name, detail); item.append(text); get('#food-legend').append(item);
-    }
-  }
   get('h1').textContent = arena.name;
   get('.arena-heading p').textContent = arena.subtitle;
   get('.species-card h2').textContent = species.scientificName;

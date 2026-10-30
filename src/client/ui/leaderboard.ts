@@ -4,7 +4,7 @@ import { createSpeciesIcon } from './species-icon';
 
 export function createLeaderboard(viewport: HTMLElement) {
   const sidebar = document.createElement('aside'); sidebar.className = 'arena-sidebar overlay';
-  sidebar.setAttribute('aria-label', 'Room standings and food guide');
+  sidebar.setAttribute('aria-label', 'Room standings');
   const panel = document.createElement('section'); panel.className = 'leaderboard';
   panel.setAttribute('aria-label', 'Top ten players and bots by biomass');
   const heading = document.createElement('h2'); heading.textContent = 'Top 10';
@@ -17,7 +17,6 @@ export function createLeaderboard(viewport: HTMLElement) {
     legend.append(label);
   }
   panel.append(heading, caption, list, legend); sidebar.append(panel);
-  const food = viewport.querySelector('.food-guide'); if (food) sidebar.append(food);
   viewport.append(sidebar);
   let previous = '';
   return {

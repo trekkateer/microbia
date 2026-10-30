@@ -283,3 +283,8 @@ Added an arena sidebar with server-ranked human colony biomass, species-colored 
 
 Every seeded AI colony receives a stable unique pond-themed name. Leaderboard aggregation now combines living bot colony biomass with human colony scores in one top ten, retaining names after division, founder death and respawn without double-counting daughters. Bot rows are marked separately from people and do not affect human room capacity. Added five distinct inline SVG species silhouettes to the left of leaderboard names; names retain species colors. All 162 unit tests, both production builds and the live transport check pass. Browser icon/marker coverage added; browser execution remains limited by the existing Edge launch issue.
 
+
+## Consolidated organism and health HUD
+
+Removed the food guide markup, legend population and unused styling. Combined organism identity, ability/division controls and nutrient inventory with biomass, energy, hunger and feeding feedback in one responsive two-column organism panel. Preserved live meter IDs, progress semantics and all simulation rules. Removed leaderboard food-guide wrapping and freed its sidebar height. Updated browser fixtures/assertions for the merged panel; 162 unit tests and both builds pass. Browser visual verification is still limited by Edge launch failures.
+

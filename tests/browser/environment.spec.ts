@@ -10,7 +10,7 @@ for (const name of ['Euglena', 'Diatom']) {
     await expect(page.locator('#loading')).toBeHidden();
     await page.evaluate(() => { window.__microbiaTest!.world.organisms = []; });
     await expect(page.locator('.food-guide')).toContainText('Dissolved CO₂');
-    await expect(page.locator('.food-guide')).not.toContainText('Your diet: Paramecium');
+    await expect(page.locator('.organism-panel .organism-vitals')).toHaveCount(1);
     await expect(page.locator('#environment-status')).toContainText('Sunlit water');
     await expect.poll(() => page.evaluate(() => window.__microbiaTest!.world.player.mass)).toBeGreaterThan(name === 'Euglena' ? 18.5 : 16.5);
     await expect(page.locator('#ability-status')).toHaveText('Ready');
@@ -28,8 +28,7 @@ for (const name of ['Euglena', 'Diatom']) {
     await page.setViewportSize({ width: 800, height: 700 });
     await page.screenshot({ path: testInfo.outputPath(`${name.toLowerCase()}-compact.png`) });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    const guide = (await page.locator('.food-guide').boundingBox())!, stats = (await page.locator('.growth-card').boundingBox())!;
-    expect(guide.y + guide.height).toBeLessThan(stats.y);
+    await expect(page.locator('.growth-card')).toHaveCount(0);
     const environment = (await page.locator('#environment-status').boundingBox())!, card = (await page.locator('.species-card').boundingBox())!;
     expect(environment.y + environment.height).toBeLessThan(card.y);
     expect(errors).toEqual([]);

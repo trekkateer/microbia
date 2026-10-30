@@ -277,3 +277,8 @@ Isolated simulation browser checks open /tests/browser/fixtures/local.html throu
 
 The arena sidebar shows the ten highest human and bot colonies by total living biomass. Names use their species membrane colors, with a species legend and a (you) marker on your row. Enter an optional name on the homepage; anonymous players receive a short Player label. Names are capped at 24 characters and rendered as text. Named bot colonies compete in the same rankings and carry a bot marker. Each row includes a tiny species silhouette immediately before the name. Bot names stay with their colony through division and respawn. Standings update with server snapshots and remove disconnected players.
 
+
+### Compact organism panel
+
+The arena no longer displays a Food in this drop guide. Your Organism now contains biomass, growth, energy, hunger, feeding feedback, abilities, division controls and nutrient inventory in one responsive panel. The leaderboard stays in its own sidebar.
+

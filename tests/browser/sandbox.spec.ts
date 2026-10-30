@@ -13,7 +13,7 @@ test('pond renders and mouse steering eats food', async ({ page }, testInfo) => 
   const canvas = page.locator('canvas');
   await expect(canvas).toBeVisible();
   await expect(page.locator('#mass')).toHaveText('25');
-  await expect(page.locator('#food-legend li')).toHaveCount(4);
+  await expect(page.locator('.food-guide')).toHaveCount(0);
   await expect(page.locator('#nutrition-status')).toContainText('Low');
   await expect(page.locator('#energy')).toHaveText(/\d+%/);
   await page.screenshot({ path: testInfo.outputPath('pond-initial.png') });
