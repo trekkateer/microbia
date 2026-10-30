@@ -75,6 +75,27 @@ export class MovementPrediction {
   render(previous: WorldSnapshot, current: WorldSnapshot, ownerId: string, appliedSequence: number, command: MoveCommand, fraction: number, delta: number, stateAge: number) {
     const actors = [current.player, ...current.organisms];
     const owned = actors.filter(p => p.kind === 'player' && p.ownerId === ownerId);
+    // A predicted player and an interpolated neighbor occupy different times.
+    // Near contact, render the whole interaction on the authoritative timeline,
+    // including owned siblings, knockback and mass-weighted pushing. Replaying
+    // against frozen latest-snapshot obstacles creates false barriers/overlaps.
+    const alive = actors.filter(p => p.alive);
+    const broadest = alive.reduce((n, p) => Math.max(n, p.radius * 1.4 + Math.hypot(p.velocity.x, p.velocity.y) * MAX_SECONDS), 0);
+    const neighbors = new SpatialGrid(alive);
+    const nearContact = owned.some(actor => {
+      if (!actor.alive) return false;
+      const travel = Math.max(actor.speed, Math.hypot(actor.velocity.x, actor.velocity.y)) * MAX_SECONDS;
+      const reach = actor.radius * 1.4 + travel + broadest + 4;
+      return neighbors.query(actor.x - reach, actor.y - reach, actor.x + reach, actor.y + reach).some(other => {
+        if (other.id === actor.id) return false;
+        const distance = (actor.radius + other.radius) * 1.4 + travel + Math.hypot(other.velocity.x, other.velocity.y) * MAX_SECONDS + 4;
+        return (actor.x - other.x) ** 2 + (actor.y - other.y) ** 2 <= distance * distance;
+      });
+    });
+    if (nearContact) {
+      this.shown.clear(); this.correction.clear(); this.base.clear(); this.source = undefined;
+      return { previous, current };
+    }
     const topology = owned.map(p => `${p.id}:${p.generation}:${p.divisionCount}:${p.alive}:${p.stunnedUntil}:${p.ability?.effect ?? ''}`).join('|');
     const changed = this.topology !== '' && this.topology !== topology;
     if (changed) { this.inputs = []; this.shown.clear(); this.correction.clear(); this.revision++; }

@@ -101,6 +101,36 @@ it('checks detailed neighboring membranes without moving the obstacle or tunneli
   expect(shown.organisms.find(p => p.id === obstacle.id)!.x).toBe(obstacle.x);
 });
 
+it('uses the same authoritative timeline for neighboring cells instead of predicting into interpolated bodies', () => {
+  const { room, actor, prediction } = scene();
+  const neighbor = createOrganism(species['paramecium-caudatum'], room.world.nutrition, 'neighbor', actor.x + 90, actor.y);
+  neighbor.kind = 'ai'; neighbor.velocity = { x: -100, y: 0 };
+  room.world.organisms.push(neighbor);
+  const previous = room.state('a');
+  actor.x -= 10; neighbor.x -= 8;
+  const current = room.state('a'), original = JSON.stringify({ previous, current });
+  for (let i = 0; i < 8; i++) prediction.record(i, right);
+  const shown = prediction.render(previous, current, 'a', -1, right, 1, 1 / 60, 0.1);
+  expect(shown.previous).toBe(previous);
+  expect(shown.current).toBe(current);
+  expect(JSON.stringify({ previous, current })).toBe(original);
+});
+
+it('includes owned siblings and discards correction offsets when approaching contact', () => {
+  const { room, actor, prediction } = scene();
+  const initial = room.state('a');
+  for (let i = 0; i < 6; i++) prediction.record(i, right);
+  expect(prediction.render(initial, initial, 'a', -1, right, 1, 1 / 60, 0.1).current.player.x).toBeGreaterThan(actor.x);
+  const sibling = createOrganism(species[actor.speciesId], room.world.nutrition, 'sibling', actor.x + 75, actor.y);
+  sibling.kind = 'player'; sibling.ownerId = 'a'; room.world.organisms.push(sibling);
+  const current = room.state('a');
+  expect(prediction.render(initial, current, 'a', 5, right, 1, 1 / 60, 0.1).current).toBe(current);
+  room.world.organisms = room.world.organisms.filter(p => p.id !== sibling.id);
+  const open = room.state('a');
+  const resumed = prediction.render(current, open, 'a', 5, idle, 0, 1 / 60, 0.1);
+  expect(resumed.current.player.x).toBeCloseTo(open.player.x, 3);
+});
+
 it('remains responsive with a simulated 200ms round trip and converges after stopping', () => {
   const { room, prediction } = scene();
   room.world.foodParticles = [];
