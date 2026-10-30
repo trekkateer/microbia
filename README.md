@@ -60,7 +60,7 @@ idle and are not a performance target.
 
 Keep exactly **one instance**: rooms and sessions live in process memory and
 cannot be spread across replicas. Deploys/restarts reset every pond and disconnect
-players; reload and rejoin afterward. No database or disk is required yet.
+players; disconnected runs end in resignation, and players must start a new run afterward. No database or disk is required yet.
 The server closes live streams on SIGTERM/SIGINT and exposes `/healthz` for host
 readiness checks. The build explicitly installs development dependencies because
 TypeScript and Vite are required even when `NODE_ENV=production`.
@@ -275,7 +275,7 @@ Isolated simulation browser checks open /tests/browser/fixtures/local.html throu
 
 ### Room leaderboard
 
-The arena sidebar shows the ten highest human and bot colonies by total living biomass. Names use their species membrane colors, with a species legend and a (you) marker on your row. Enter an optional name on the homepage; anonymous players receive a short Player label. Names are capped at 24 characters and rendered as text. Named bot colonies compete in the same rankings and carry a bot marker. Each row includes a tiny species silhouette immediately before the name. Bot names stay with their colony through division and respawn. Standings update with server snapshots and remove disconnected players.
+The arena sidebar shows the five highest human and bot colonies by total living biomass. Names use their species membrane colors, with a species legend and a (you) marker on your row. Enter an optional name on the homepage; anonymous players receive a short Player label. Names are capped at 24 characters and rendered as text. Named bot colonies compete in the same rankings and carry a bot marker. Each row includes a tiny species silhouette immediately before the name. Bot names stay with their colony through division and respawn. Standings update with server snapshots and remove disconnected players.
 
 
 ### Compact organism panel

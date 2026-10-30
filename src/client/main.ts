@@ -13,6 +13,7 @@ import { createLeaderboard } from './ui/leaderboard';
 import { MovementPrediction } from './movement-prediction';
 import { idleCommand } from '../sim/commands';
 import { FoodPrediction } from './food-prediction';
+import { showResignation } from './ui/resignation';
 
 async function start(): Promise<void> {
   const arena = arenas['pond-water'];
@@ -108,6 +109,13 @@ async function start(): Promise<void> {
       leaderboard.update(network.leaderboard, network.playerId);
       lastHudTick = current.tick;
     }
+  });
+  network.onResign(reason => {
+    input.reset(); input.destroy(); prediction.reset(); foodPrediction.reset();
+    pendingCommand = idleCommand(); app.ticker.stop();
+    hud.activate.disabled = true; hud.reproduce.disabled = true; hud.respawn.disabled = true;
+    status.textContent = network.status;
+    showResignation(root.querySelector<HTMLElement>('.viewport')!, room, reason);
   });
 }
 

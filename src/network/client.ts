@@ -16,8 +16,26 @@ export async function connectPond(speciesId: string, room: string, name = '') {
   let ready!: () => void, failed!: (error: Error) => void;
   const first = new Promise<void>((resolve, reject) => { ready = resolve; failed = reject; });
   void first.catch(() => {});
-  const lost = () => { disconnected = true; events?.close(); failed(new Error('Connection lost. Reload to rejoin.')); };
+  const listeners = new Set<(reason: string) => void>();
+  let resignationReason = 'Connection lost. Your run has ended.';
+  let watchdog: ReturnType<typeof setInterval> | undefined;
+  const offline = () => lost('You went offline. Your run has ended.');
+  const leaving = () => lost('You left the arena. Your run has ended.');
+  const lost = (reason = 'Connection lost. Your run has ended.') => {
+    if (disconnected) return;
+    disconnected = true; resignationReason = reason;
+    clearInterval(watchdog);
+    if (typeof window !== 'undefined') { window.removeEventListener('offline', offline); window.removeEventListener('pagehide', leaving); }
+    events?.close(); socket?.close();
+    // Best effort for HTTP failures/offline transitions. A broken transport is
+    // also removed server-side on close or heartbeat expiry.
+    void fetch('/api/leave', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(session), keepalive: true, signal: AbortSignal.timeout(5000) }).catch(() => {});
+    failed(new Error(reason));
+    for (const listener of listeners) listener(reason);
+    listeners.clear();
+  };
   const receive = (event: MessageEvent) => {
+    if (disconnected) return;
     try {
       const data = JSON.parse(event.data);
       if (data.kind === 'ack') { rtt = Math.max(0, performance.now() - data.sentAt); return; }
@@ -38,7 +56,7 @@ export async function connectPond(speciesId: string, room: string, name = '') {
     };
     const timeout = setTimeout(abandon, 2500);
     ws.onmessage = receive;
-    ws.onopen = () => { clearTimeout(timeout); socket = ws; ws.onclose = lost; resolve(true); };
+    ws.onopen = () => { clearTimeout(timeout); socket = ws; ws.onclose = () => lost(); resolve(true); };
     ws.onerror = () => { if (socket === ws) lost(); else abandon(); };
     ws.onclose = () => { clearTimeout(timeout); resolve(false); };
   });
@@ -50,13 +68,18 @@ export async function connectPond(speciesId: string, room: string, name = '') {
     if (!retry.ok) throw new Error(replacement.error ?? 'Unable to join');
     Object.assign(session, replacement);
     events = new EventSource('/api/events?' + new URLSearchParams(session));
-    events.onmessage = receive; events.onerror = lost;
+    events.onmessage = receive; events.onerror = () => lost();
   }
   let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
     await Promise.race([first, new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error('Server did not respond')), 10000); })]);
-  } catch (error) { events?.close(); socket?.close(); throw error; }
+  } catch (error) { lost(); throw error; }
   finally { clearTimeout(timeout); }
+  if (!disconnected) {
+    // Do not tie liveness to inputs: changing tabs must not resign a live player.
+    watchdog = setInterval(() => { if (performance.now() - lastStateAt > 10000) lost('The server stopped responding. Your run has ended.'); }, 1000);
+    if (typeof window !== 'undefined') { window.addEventListener('offline', offline); window.addEventListener('pagehide', leaving); }
+  }
   let inFlight = 0, sequence = 0;
   let queued: MoveCommand = { direction: { x: 0, y: 0 } };
   return {
@@ -66,8 +89,13 @@ export async function connectPond(speciesId: string, room: string, name = '') {
     get appliedSequence() { return appliedSequence; },
     get stateAge() { return (performance.now() - lastStateAt) / 1000; },
     get connected() { return !disconnected; },
+    onResign(listener: (reason: string) => void) {
+      if (disconnected) listener(resignationReason); else listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    resign: () => lost('You resigned. Your run has ended.'),
     get status() {
-      if (disconnected) return 'Disconnected - reload to rejoin';
+      if (disconnected) return 'Resigned - connection ended';
       const age = performance.now() - lastStateAt;
       const health = (socket ? 'WebSocket' : 'HTTP fallback') + ' | RTT ' + (rtt ? Math.round(rtt) + ' ms' : 'measuring') + ' | State ' + Math.round(age) + ' ms' + (age > 500 ? ' (waiting for server)' : '') + ' | Server ' + tickHz.toFixed(0) + ' Hz / ' + tickMs.toFixed(1) + ' ms';
       return room + ' | ' + players + '/20 players | ' + health;
@@ -85,7 +113,7 @@ export async function connectPond(speciesId: string, room: string, name = '') {
       inFlight++;
       void fetch('/api/input', { signal: AbortSignal.timeout(5000), method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
         .then(async response => { if (!response.ok) throw new Error('Input rejected'); const ack = await response.json(); if (Number.isFinite(ack.sentAt)) rtt = Math.max(0, performance.now() - ack.sentAt); })
-        .catch(lost).finally(() => { inFlight--; });
+        .catch(() => lost()).finally(() => { inFlight--; });
       return outgoingSequence;
     },
   };

@@ -38,6 +38,13 @@ const server = createServer(async (req, res) => {
         blocked: () => res.writableNeedDrain, send: packet => { res.write(`data: ${packet}\n\n`); }, close: () => res.destroy() });
       res.on('close', () => { streams.delete(token); cleanup(room, id); }); return;
     }
+    if (url.pathname === '/api/leave' && req.method === 'POST') {
+      const body = await bodyOf(req), room = rooms.get(String(body.room)), id = String(body.id);
+      if (!room || room.clients.get(id)?.token !== body.token) return json(403, { error: 'Invalid session' });
+      const stream = streams.get(String(body.token));
+      streams.delete(String(body.token)); cleanup(room, id); stream?.close();
+      return json(200, { ok: true });
+    }
     if (url.pathname === '/api/input' && req.method === 'POST') {
       const body = await bodyOf(req), room = rooms.get(String(body.room)), client = room?.clients.get(String(body.id));
       if (!client || client.token !== body.token) return json(403, { error: 'Invalid session' });
@@ -69,7 +76,7 @@ server.on('upgrade', (req, socket, head) => {
       blocked: () => ws.bufferedAmount > 64_000, send: packet => ws.send(packet), close: () => ws.terminate() });
     let alive = true;
     ws.on('pong', () => { alive = true; });
-    const heartbeat = setInterval(() => { if (!alive) ws.terminate(); else { alive = false; ws.ping(); } }, 15000);
+    const heartbeat = setInterval(() => { if (!alive) ws.terminate(); else { alive = false; ws.ping(); } }, 5000);
     heartbeat.unref();
     ws.on('message', (data, binary) => {
       try {
@@ -88,7 +95,7 @@ async function bodyOf(req: import('node:http').IncomingMessage): Promise<Record<
   let data = ''; for await (const chunk of req) { data += chunk; if (data.length > 2048) throw new Error('Request too large'); }
   return JSON.parse(data);
 }
-function cleanup(room: Room, id: string) { room.leave(id); if (!room.clients.size) rooms.delete(room.id); }
+function cleanup(room: Room, id: string) { room.leave(id); if (!room.clients.size && rooms.get(room.id) === room) rooms.delete(room.id); }
 let rateStarted = performance.now(), rateTicks = 0;
 const simulationTimer = setInterval(() => {
   const started = performance.now();

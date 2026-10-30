@@ -53,7 +53,13 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   await until(p => p.appliedSequence >= 0 && p.own?.some(p => p.x > x + 5));
   const rejected = await fetch(base + '/api/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...session, token: 'wrong', sequence: 9, command: { direction: { x: 0, y: 0 } } }) });
   assert.equal(rejected.status, 403);
-  ws.close(); await once(ws, 'close');
+  const leave = body => fetch(base + '/api/leave', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  assert.equal((await leave({ ...session, token: 'wrong' })).status, 403);
+  const closed = once(ws, 'close');
+  assert.equal((await leave(session)).status, 200);
+  await closed;
+  assert.equal((await fetch(base + '/api/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...session, sequence: 99, command: { direction: { x: 0, y: 0 }, respawn: true } }) })).status, 403);
+  assert.equal((await fetch(base + '/api/events?' + new URLSearchParams(session))).status, 403);
   await new Promise(resolve => setTimeout(resolve, 50));
   assert.ok(!(await (await fetch(base + '/api/lobby')).json()).some(r => r.id === 'socket-test'));
   const fallback = await join('sse-test');
@@ -62,6 +68,8 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   assert.equal(stream.status, 200);
   const reader = stream.body.getReader();
   const chunk = await reader.read(); assert.ok(chunk.value.length > 0);
-  await reader.cancel();
+  assert.equal((await leave(fallback)).status, 200);
+  await reader.cancel().catch(() => {}); // Explicit resignation destroys the SSE stream.
+  assert.equal((await fetch(base + '/api/events?' + new URLSearchParams(fallback))).status, 403);
 });
 
