@@ -176,6 +176,9 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 #hunger-status { font-size: 10px; line-height: 1.5; color: #b8c9ad; margin: 8px 0 0; }
 @media (max-width: 680px) { #hunger-status { font-size: 9px; } .hunger-row { margin-top: 9px; } }
 /* Combined organism controls and live health/biomass. */
+.hud-toggle { position: absolute; top: 12px; right: 12px; border: 1px solid #a4c7a43d; border-radius: 5px; background: #bdd0b912; color: #c4d9b5; padding: 5px 8px; font-size: 10px; }
+.hud-toggle:hover { background: #bdd0b92b; }
+.hud-toggle:focus-visible { outline: 2px solid #c4d9b5; outline-offset: 3px; }
 .species-card.organism-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 20px; width: 500px; padding: 20px; max-height: calc(100% - 220px); pointer-events: auto; }
 .organism-panel > .eyebrow { grid-column: 1 / -1; }
 .organism-panel > h2, .organism-panel > p, .organism-panel > .ability-panel, .organism-panel > .reproduction-panel, .organism-panel > .kit-details { grid-column: 1; }
@@ -189,3 +192,20 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 @media (max-width: 680px) { .species-card.organism-panel { left: 16px; bottom: 16px; width: calc(100% - 32px); padding: 12px; column-gap: 12px; max-height: calc(100% - 190px); } .organism-panel > .organism-vitals { padding-left: 12px; } .viewport .arena-sidebar { max-height: 140px; } }
 
 @media (max-width: 680px) { .viewport .arena-heading h1 { font-size: 22px; margin: 8px 0 6px; } .viewport .arena-heading > p:not(#environment-status), .viewport #population { display: none; } .viewport .sandbox-actions { margin-top: 8px; gap: 5px; } .viewport #environment-status { font-size: 9px; line-height: 1.4; margin-top: 7px; } }
+.organism-panel > h2 { padding-right: 50px; }
+.species-card.organism-panel[data-compact="true"] { display: block; width: 260px; min-width: 0; padding: 16px; max-height: calc(100% - 190px); }
+.organism-panel[data-compact="true"] > :not(h2):not(.organism-vitals):not(.hud-toggle) { display: none; }
+.organism-panel[data-compact="true"] > h2 { margin: 0 0 16px; font-size: 21px; }
+.organism-panel[data-compact="true"] > .organism-vitals { border: 0; padding: 0; }
+.organism-panel[data-compact="true"] .organism-vitals > p,
+.organism-panel[data-compact="true"] #digestion-status,
+.organism-panel[data-compact="true"] #growth-label,
+.organism-panel[data-compact="true"] .eaten-count { display: none; }
+.organism-panel[data-compact="true"] .mass-line { margin-top: 4px; }
+.organism-panel[data-compact="true"] #mass { font-size: 24px; }
+.organism-panel[data-compact="true"] .growth-track { margin-top: 5px; }
+.site-footer.arena-diagnostics { gap: 16px; min-height: 43px; height: auto; padding: 10px 0; border-top: 1px solid #a4c7a426; letter-spacing: .6px; line-height: 1.6; }
+.diagnostics-label { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: #b5cbb4; }
+.diagnostics-label::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #8ebc91; box-shadow: 0 0 8px #8ebc9140; }
+.diagnostics-values { color: #8fa99c; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+@media (max-width: 680px) { .species-card.organism-panel[data-compact="true"] { width: min(260px, calc(100% - 32px)); } .site-footer.arena-diagnostics { gap: 6px; align-items: flex-start; flex-direction: column; } .diagnostics-values { text-align: left; font-size: 8px; } }

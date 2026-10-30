@@ -9,6 +9,7 @@ test('pond renders and mouse steering eats food', async ({ page }, testInfo) => 
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   await expect(page.getByRole('heading', { name: 'Pond Water', exact: true })).toBeVisible();
   const canvas = page.locator('canvas');
   await expect(canvas).toBeVisible();
@@ -43,6 +44,7 @@ test('keyboard feeding and viewport resize work', async ({ page }, testInfo) => 
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   const bounds = (await page.locator('canvas').boundingBox())!;
   await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
   await page.keyboard.down('d');

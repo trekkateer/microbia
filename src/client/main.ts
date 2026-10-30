@@ -71,8 +71,7 @@ async function start(): Promise<void> {
     current = network.state; previous = current; networkBlend = 0;
   });
   hud.loading.hidden = true;
-  const status = document.createElement('div');
-  status.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:20;background:#102820;color:#e2efc8;padding:8px;pointer-events:none'; hud.host.append(status);
+  const status = hud.diagnostics;
   let networkBlend = 0;
   let lastHudTick = -1;
   let lastStatusAt = -Infinity;

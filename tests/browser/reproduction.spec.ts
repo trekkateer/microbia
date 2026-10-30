@@ -6,6 +6,7 @@ test('R divides into two controlled cells, conserves colony biomass and keeps st
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   await expect(page.locator('#reproduction-status')).toContainText('213.75 mass (95%)');
   await page.evaluate(async () => {
     const path = '/src/sim/systems/growth.ts'; const { updateGrowth } = await import(path);
@@ -40,6 +41,7 @@ test('both controlled cells show their own absorption pulse', async ({ page }, t
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   await page.evaluate(async () => {
     const visualPath = '/src/client/rendering/absorption-pulses.ts';
     const { AbsorptionPulses } = await import(visualPath);
@@ -73,6 +75,7 @@ test('movement targeting launches only the closest forward-facing hunter', async
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   await page.evaluate(async () => {
     const path = '/src/sim/world.ts'; const { createOrganism } = await import(path);
     const w = window.__microbiaTest!.world;
@@ -100,6 +103,7 @@ test('the round continues after one daughter dies, then respawns as one cell aft
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Paramecium', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   await page.evaluate(async () => {
     const path = '/src/sim/world.ts'; const { createOrganism } = await import(path);
     const w = window.__microbiaTest!.world;

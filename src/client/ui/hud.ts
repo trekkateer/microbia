@@ -34,6 +34,34 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
     <footer class="site-footer"><span><span class="footer-dot"></span> LOCAL POND <i>/</i> FIVE SINGLE-CELLED SPECIES</span><span>ONE DROP. A WHOLE WORLD.</span></footer>
   `;
   const get = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
+  const panel = get('.organism-panel');
+  const toggle = document.createElement('button');
+  toggle.type = 'button'; toggle.className = 'hud-toggle';
+  panel.id = 'player-hud';
+  toggle.setAttribute('aria-controls', 'player-hud');
+  panel.append(toggle);
+  let compact = true;
+  try { compact = localStorage.getItem('microbia.hud.compact') !== 'false'; } catch { /* Storage is optional. */ }
+  const setCompact = () => {
+    panel.dataset.compact = String(compact);
+    toggle.textContent = compact ? 'Expand' : 'Compact';
+    toggle.setAttribute('aria-label', compact ? 'Expand player HUD' : 'Compact player HUD');
+    toggle.setAttribute('aria-expanded', String(!compact));
+  };
+  setCompact();
+  toggle.addEventListener('click', () => {
+    compact = !compact; setCompact();
+    try { localStorage.setItem('microbia.hud.compact', String(compact)); } catch { /* Storage is optional. */ }
+  });
+  const footer = get('.site-footer');
+  footer.classList.add('arena-diagnostics');
+  const diagnostics = document.createElement('output');
+  diagnostics.className = 'diagnostics-values';
+  diagnostics.setAttribute('aria-label', 'Connection and performance');
+  diagnostics.setAttribute('aria-live', 'off');
+  const connectionLabel = document.createElement('span');
+  connectionLabel.className = 'diagnostics-label'; connectionLabel.textContent = 'POND CONNECTION';
+  footer.replaceChildren(connectionLabel, diagnostics);
   const reproductionPanel = document.createElement('div');
   reproductionPanel.className = 'reproduction-panel';
   reproductionPanel.innerHTML = '<button id="reproduce" type="button"><kbd>R</kbd> Divide</button><output id="reproduction-status" aria-live="polite"></output><small id="cell-count"></small><span id="reproduction-message"></span>';
@@ -77,6 +105,7 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
   progress.setAttribute('aria-valuemin', String(species.starvation.minimumMass));
   progress.setAttribute('aria-valuemax', String(species.growth.maximumMass));
   return {
+    diagnostics,
     host: get('#game'),
     loading: get('#loading'),
     activate: get<HTMLButtonElement>('#activate-ability'),

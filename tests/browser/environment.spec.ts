@@ -8,6 +8,7 @@ for (const name of ['Euglena', 'Diatom']) {
     await page.getByRole('button', { name: `Play as ${name}`, exact: true }).click();
     await expect(page.locator('canvas')).toBeVisible();
     await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
     await page.evaluate(() => { window.__microbiaTest!.world.organisms = []; });
     await expect(page.locator('.food-guide')).toContainText('Dissolved CO₂');
     await expect(page.locator('.organism-panel .organism-vitals')).toHaveCount(1);
@@ -39,6 +40,7 @@ test('shade and cold currents give visible feedback with real simulation effects
   await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Euglena', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
+  await page.getByRole('button', { name: 'Expand player HUD' }).click();
   await page.evaluate(() => {
     const w = window.__microbiaTest!.world;
     w.organisms = []; w.player.x = 3075; w.player.y = 975; w.player.mass = 22;

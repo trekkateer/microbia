@@ -9,6 +9,11 @@ test('organism controls and live trackers share one panel without a food guide',
   await expect(panel.getByRole('group', { name: 'Health and growth' })).toBeVisible();
   await expect(panel.getByRole('progressbar', { name: 'Nourishment', exact: true })).toBeVisible();
   await expect(panel.locator('#mass')).toHaveText('25');
+  await expect(panel.locator('#activate-ability')).toBeHidden();
+  await expect(panel.locator('#hunger-status')).toBeHidden();
+  await expect(panel.getByRole('heading')).toHaveText('Amoeba proteus');
+  await expect(panel.getByRole('progressbar', { name: 'Energy reserve', exact: true })).toBeVisible();
+  await panel.getByRole('button', { name: 'Expand player HUD' }).click();
   await expect(panel.locator('#activate-ability')).toBeVisible();
   await expect(panel.locator('#reproduce')).toBeVisible();
   await page.setViewportSize({ width: 400, height: 700 });
@@ -16,4 +21,9 @@ test('organism controls and live trackers share one panel without a food guide',
   expect(bounds.x).toBeGreaterThanOrEqual(0);
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(400);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await panel.getByRole('button', { name: 'Compact player HUD' }).click();
+  await expect(panel.locator('#reproduce')).toBeHidden();
+  await expect(panel.getByRole('progressbar', { name: 'Nourishment', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('microbia.hud.compact'))).toBe('true');
+  await expect(page.locator('.arena-diagnostics')).toBeVisible();
 });
