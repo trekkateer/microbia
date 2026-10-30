@@ -268,3 +268,8 @@ All public play now connects to the authoritative shared pond. Removed the multi
 
 Validation: 158 unit tests, the live WebSocket/SSE transport test and both production builds pass. The multiplayer-only browser check was added but Edge fails to launch in this environment. Production output excludes the development-only simulation fixture and background simulation worker.
 
+
+## Separate lobby and arena pages
+
+The homepage is a separate entry for lobby/species selection, navigating to /play?room=1 by default. Arena HTML is built separately under play/index.html and served explicitly for /play and /play/; no SPA fallback handles arena routes. Room query parameters preserve numbered or existing named room IDs across direct invites, refresh, and species changes. New visitors return to the picker with their requested room before joining. Species selection uses session storage, with an explicit species parameter fallback if storage is unavailable. Room validation and the default 1 are shared with the server. All 160 unit tests, both production builds and the live WebSocket/SSE transport check including direct HTML routes pass. Browser UI checks remain limited by the environment's Edge launch failure.
+

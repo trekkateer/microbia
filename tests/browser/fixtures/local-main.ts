@@ -24,6 +24,7 @@ async function start(): Promise<void> {
     catch (error) { const notice = document.createElement('p'); notice.textContent = String(error) + ' - reload to try again or choose local play.'; document.querySelector('#app')!.append(notice); return; }
   }
   const hud = createHud(document.querySelector<HTMLElement>('#app')!, arena, organism, nutrition);
+  document.querySelectorAll<HTMLAnchorElement>('.sandbox-actions a, #death-panel a').forEach(link => { link.href = '/tests/browser/fixtures/local.html'; });
   const app = new Application();
   try {
     await app.init({ resizeTo: hud.host, background: arena.theme.background, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl' });

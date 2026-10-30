@@ -4,6 +4,23 @@
 
 ## Run
 
+### Pages and room links
+
+The homepage `/` is the lobby and species picker. Choosing a species navigates to
+the separate arena page `/play?room=1`; room 1 is the default. `/play?room=2` and
+other room IDs join separate shared ponds with their own bots and human players.
+Existing named IDs remain supported (for example `/play?room=friends`).
+
+Share the arena URL to invite people. New visitors choose their species on the
+homepage before continuing into that same room. The selected species is kept in
+session storage, so refreshing `/play?room=1` rejoins room 1 as that species.
+Changing species returns to the homepage with the current room preserved.
+Refreshing/rejoining starts a new colony; colony/session persistence is unchanged.
+
+Home and play use separate HTML and JavaScript entry points. Both the Node server
+and Vite development/preview servers serve `/play` directly; the homepage no
+longer downloads the Pixi arena renderer. Tests check direct paths and defaults.
+
 ### Multiplayer connection diagnostics
 
 Multiplayer now prefers one WebSocket at `/api/socket` for state and input,
@@ -63,7 +80,7 @@ npm run build:prototype
 npm start
 ```
 
-Open http://localhost:3000. Every game joins a shared server room with bots and any other people in that room. The default room is `pond`; enter another room name to play together separately. Keep the terminal running; Ctrl+C stops it. This milestone targets desktop mouse/keyboard with WebGL; touch controls arrive in M6.
+Open http://localhost:3000. Every game joins a shared server room with bots and any other people in that room. The default room is `1`; enter another room name to play together separately. Keep the terminal running; Ctrl+C stops it. This milestone targets desktop mouse/keyboard with WebGL; touch controls arrive in M6.
 
 ## Play and check M4
 
@@ -211,7 +228,7 @@ npm run build:prototype
 npm start
 ```
 
-Open http://localhost:3000, enter a room name (default `pond`), then choose your species. Every game is multiplayer; there is no local-play toggle or offline fallback. Rooms include AI bots even when you are the only human. Open a second browser tab with the same room name to play together. Each player owns a separate colony; mouse/WASD, Space, R and respawn work through the server. Rooms accept 20 players and show live counts and a biomass leaderboard. A different room name creates a separate shared pond.
+Open http://localhost:3000, enter a room name (default `1`), then choose your species. Every game is multiplayer; there is no local-play toggle or offline fallback. Rooms include AI bots even when you are the only human. Open a second browser tab with the same room name to play together. Each player owns a separate colony; mouse/WASD, Space, R and respawn work through the server. Rooms accept 20 players and show live counts and a biomass leaderboard. A different room name creates a separate shared pond.
 
 For another computer on the same network, open `http://<server-LAN-IP>:3000`; both players must use the same server address and room name. Public internet play requires hosting the Node server with HTTPS and a reverse proxy that allows unbuffered `/api/events` responses. This change does not deploy a public server. Set `PORT` and `HOST` to configure listening (defaults: 3000 and 0.0.0.0).
 

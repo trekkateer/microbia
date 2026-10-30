@@ -5,6 +5,7 @@ import { resolve, extname, sep } from 'node:path';
 import { Room } from './room';
 import { RoomBroadcast } from './broadcast';
 import { WebSocketServer, WebSocket } from 'ws';
+import { DEFAULT_ROOM, validateRoom } from '../network/room-url';
 
 const rooms = new Map<string, Room>();
 interface Stream { room: Room; id: string; needsFull: boolean; buffered: () => number; blocked: () => boolean; send: (packet: string) => void; close: () => void }
@@ -22,8 +23,7 @@ const server = createServer(async (req, res) => {
     if (url.pathname === '/api/lobby' && req.method === 'GET') return json(200, [...rooms.values()].map(r => ({ id: r.id, players: r.clients.size, maximum: 20 })));
     if (url.pathname === '/api/join' && req.method === 'POST') {
       const body = await bodyOf(req);
-      const name = typeof body.room === 'string' ? body.room : 'pond';
-      if (!/^[a-zA-Z0-9-]{1,24}$/.test(name)) throw new Error('Use 1-24 letters, numbers or hyphens for the room');
+      const name = validateRoom(typeof body.room === 'string' ? body.room : DEFAULT_ROOM);
       if (!rooms.has(name)) { if (rooms.size >= 16) throw new Error('Server room limit reached'); rooms.set(name, new Room(name)); }
       const room = rooms.get(name)!, id = randomUUID(), token = randomUUID();
       room.join(id, token, String(body.speciesId));
@@ -46,7 +46,12 @@ const server = createServer(async (req, res) => {
     }
     if (url.pathname.startsWith('/api/')) return json(404, { error: 'Not found' });
     if (req.method !== 'GET') return json(405, { error: 'Method not allowed' });
-    const file = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
+    const play = url.pathname === '/play' || url.pathname === '/play/';
+    if (play && !url.searchParams.has('room')) {
+      url.searchParams.set('room', DEFAULT_ROOM);
+      res.writeHead(302, { Location: '/play?' + url.searchParams, 'Cache-Control': 'no-store' }); res.end(); return;
+    }
+    const file = resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : play ? '/play/index.html' : url.pathname));
     if (!file.startsWith(root + sep)) return json(403, { error: 'Forbidden' });
     const data = await readFile(file);
     const types: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' };

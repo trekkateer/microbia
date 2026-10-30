@@ -8,8 +8,10 @@ import { contains, environmentAt } from '../../sim/systems/environment';
 import { reproductionBlock } from '../../sim/systems/reproduction';
 import { playerCells } from '../../sim/systems/player-control';
 import { HUNGER } from '../../sim/systems/hunger';
+import { selectionHref } from '../../network/room-url';
 
-export function createHud(root: HTMLElement, arena: ArenaDefinition, species: SpeciesDefinition, nutrition: NutritionDefinitions) {
+export function createHud(root: HTMLElement, arena: ArenaDefinition, species: SpeciesDefinition, nutrition: NutritionDefinitions, room?: string) {
+  const selectionUrl = room ? selectionHref(room) : './';
   const profile = nutrition.metabolism[species.metabolismId];
   const ability = abilities[species.activeId!];
   const menu = arena.foodSpawns.map(spawn => nutrition.foods[spawn.foodId]).filter(food => species.diet.includes(food.id));
@@ -17,16 +19,16 @@ export function createHud(root: HTMLElement, arena: ArenaDefinition, species: Sp
   const dietNote = producer ? `Stay in pale green nutrient patches to absorb dissolved resources. Light powers photosynthesis.${species.defense ? ' Silicate is needed for new shell material.' : ' Darkness slowly drains mass.'}` : species.diet.length ? '' : 'Your diet: Paramecium. Touch prey to feed; Space speeds the hunt.';
   root.innerHTML = `
     <header class="site-header">
-      <a class="brand" href="./" aria-label="microbia home"><span class="brand-cell" aria-hidden="true"></span>microbia</a>
+      <a class="brand" href="/" aria-label="microbia home"><span class="brand-cell" aria-hidden="true"></span>microbia</a>
       <div class="build-tag"><span></span> LIVING POND <b>M4</b></div>
     </header>
     <main class="viewport" aria-label="Pond Water game">
       <div id="game"></div>
       <div class="vignette" aria-hidden="true"></div>
-      <div class="arena-heading overlay"><div class="eyebrow"><span class="live-dot"></span> FRESHWATER / 01</div><h1></h1><p></p><div class="sandbox-actions"><a href="./">Change species</a><span id="population"></span></div><p id="environment-status"></p></div>
+      <div class="arena-heading overlay"><div class="eyebrow"><span class="live-dot"></span> FRESHWATER / 01</div><h1></h1><p></p><div class="sandbox-actions"><a href="${selectionUrl}">Change species</a><span id="population"></span></div><p id="environment-status"></p></div>
       <section class="food-guide overlay" aria-label="Food guide"><div class="eyebrow">FOOD IN THIS DROP</div><ul id="food-legend"></ul>${dietNote ? `<p class="diet-note">${dietNote}</p>` : ''}<p class="zone-key">Gold: light · Indigo: shade<br>Blue arrows: cold current<br>Green rings: dissolved nutrients</p></section>
       <div id="loading" role="status">Bringing the pond into focus…</div>
-      <section id="death-panel" class="death-panel" role="region" aria-label="Life ended" hidden><div><div class="eyebrow">THE POND GOES ON</div><h2>A small life ends.</h2><p id="death-reason"></p><p>Return as the same species with fresh reserves.</p><button id="respawn" type="button">Respawn</button><a href="./">Choose another species</a></div></section>
+      <section id="death-panel" class="death-panel" role="region" aria-label="Life ended" hidden><div><div class="eyebrow">THE POND GOES ON</div><h2>A small life ends.</h2><p id="death-reason"></p><p>Return as the same species with fresh reserves.</p><button id="respawn" type="button">Respawn</button><a href="${selectionUrl}">Choose another species</a></div></section>
       <section class="species-card overlay" aria-label="Your organism"><div class="eyebrow">YOUR ORGANISM</div><h2></h2><p></p><div class="ability-panel"><button id="activate-ability" type="button"><kbd>Space</kbd> ${ability.name}</button><output id="ability-status">Ready</output><small>${Object.entries(ability.costs).map(([id, cost]) => `${cost} ${id}`).join(' + ')} · ${ability.cooldown}s cooldown</small><span id="ability-message"></span></div><details class="kit-details"><summary>${species.passive.name} · passive & weakness</summary><p>${species.passive.description}</p><p>Weakness: ${species.weakness}</p></details><details class="nutrient-inventory"><summary>Absorbed nutrients</summary><ul id="nutrient-inventory" aria-label="Current absorbed nutrients"></ul><p class="inventory-note">Current stock, including food digesting. Amounts fall as nutrients are used. Division shares these resources equally.</p></details></section>
       <div class="control-hint overlay"><span>Mouse</span> to steer <i>·</i> <span>W A S D</span> or <span>↑ ← ↓ →</span> to move</div>
       <section class="growth-card overlay" aria-label="Growth stats"><div class="eyebrow">BIOMASS <span id="growth-label">FORAGING</span></div><div class="mass-line"><output id="mass" aria-label="Biomass">25</output><span>mass</span><div class="eaten-count"><output id="eaten" aria-label="Foods eaten">0</output><small>FOODS</small></div></div><div class="growth-track" role="progressbar" aria-label="Growth to maximum mass" aria-valuemin="25" aria-valuemax="225" aria-valuenow="25"><div id="growth-fill"></div></div><div class="energy-row"><span>ENERGY</span><output id="energy" aria-label="Energy level"></output></div><div class="energy-track" role="progressbar" aria-label="Energy reserve"><div id="energy-fill"></div></div><div class="hunger-row"><span>HUNGER</span><output id="hunger" aria-label="Hunger level">100%</output></div><div class="hunger-track" role="progressbar" aria-label="Nourishment" aria-valuemin="0" aria-valuemax="100"><div id="hunger-fill"></div></div><p id="hunger-status"></p><p id="nutrition-status"></p><p id="food-advice"></p><div id="digestion-status"></div></section>

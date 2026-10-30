@@ -8,13 +8,23 @@ import { createHud } from './ui/hud';
 import { nutrition } from '../data/nutrition';
 import './style.css';
 import { connectPond } from '../network/client';
-import { chooseSpecies } from './ui/selection';
+import { roomFromSearch, selectionHref, SPECIES_STORAGE_KEY } from '../network/room-url';
 
 async function start(): Promise<void> {
   const arena = arenas['pond-water'];
   validateDefinitions(arena, organisms);
-  const organism = await chooseSpecies(document.querySelector<HTMLElement>('#app')!, arena, species);
-  const room = document.querySelector<HTMLInputElement>('#room-name')?.value || 'pond';
+  const root = document.querySelector<HTMLElement>('#app')!;
+  const room = roomFromSearch(location.search);
+  let speciesId = new URLSearchParams(location.search).get('species');
+  if (!speciesId) { try { speciesId = sessionStorage.getItem(SPECIES_STORAGE_KEY); } catch { /* The home page can pass species explicitly when storage is unavailable. */ } }
+  if (!speciesId || !arena.roster.includes(speciesId) || !species[speciesId]) {
+    location.replace(selectionHref(room));
+    return;
+  }
+  const organism = species[speciesId];
+  document.title = `Room ${room} · microbia`;
+  root.innerHTML = '<header class="site-header"><a class="brand" href="/">microbia</a></header><main class="selection"><h1>Joining the pond...</h1><p role="status"></p></main>';
+  root.querySelector('[role="status"]')!.textContent = `Room ${room} · ${organism.name}`;
   let network: Awaited<ReturnType<typeof connectPond>>;
   try { network = await connectPond(organism.id, room); }
   catch (error) {
@@ -26,7 +36,7 @@ async function start(): Promise<void> {
     document.querySelector('.selection')!.append(notice, retry);
     return;
   }
-  const hud = createHud(document.querySelector<HTMLElement>('#app')!, arena, organism, nutrition);
+  const hud = createHud(root, arena, organism, nutrition, room);
   const app = new Application();
   try {
     await app.init({ resizeTo: hud.host, background: arena.theme.background, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl' });
@@ -79,4 +89,10 @@ async function start(): Promise<void> {
   });
 }
 
-start().catch(error => { console.error('Unable to start microbia', error); });
+start().catch(error => {
+  console.error('Unable to start microbia', error);
+  const notice = document.createElement('p'); notice.setAttribute('role', 'alert');
+  notice.textContent = error instanceof Error ? error.message : 'Unable to open the pond.';
+  const home = document.createElement('a'); home.href = '/'; home.textContent = 'Back to home';
+  document.querySelector('#app')!.append(notice, home);
+});
