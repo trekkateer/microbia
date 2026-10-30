@@ -39,7 +39,7 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   await once(ws, 'open');
   const first = await until(p => p.resetFood === true);
   assert.equal(first.appliedSequence, -1);
-  assert.ok(first.leaderboard.length <= 10);
+  assert.ok(first.leaderboard.length <= 5);
   assert.ok(first.leaderboard.some(p => p.bot && p.name));
   assert.ok(first.leaderboard.every(p => p.speciesId && p.name));
   assert.ok(first.timing.tickHz > 0);
@@ -64,3 +64,4 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   const chunk = await reader.read(); assert.ok(chunk.value.length > 0);
   await reader.cancel();
 });
+

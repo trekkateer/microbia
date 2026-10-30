@@ -6,8 +6,8 @@ export function createLeaderboard(viewport: HTMLElement) {
   const sidebar = document.createElement('aside'); sidebar.className = 'arena-sidebar overlay';
   sidebar.setAttribute('aria-label', 'Room standings');
   const panel = document.createElement('section'); panel.className = 'leaderboard';
-  panel.setAttribute('aria-label', 'Top ten players and bots by biomass');
-  const heading = document.createElement('h2'); heading.textContent = 'Top 10';
+  panel.setAttribute('aria-label', 'Top five players and bots by biomass');
+  const heading = document.createElement('h2'); heading.textContent = 'Top 5';
   const caption = document.createElement('p'); caption.textContent = 'BIOMASS · PEOPLE & BOTS';
   const list = document.createElement('ol');
   const legend = document.createElement('div'); legend.className = 'leaderboard-legend';
@@ -21,7 +21,7 @@ export function createLeaderboard(viewport: HTMLElement) {
   let previous = '';
   return {
     update(entries: readonly LeaderboardEntry[], playerId: string) {
-      const top = entries.slice(0, 10);
+      const top = entries.slice(0, 5);
       const signature = JSON.stringify([playerId, top.map(p => [p.id, p.name, p.speciesId, p.bot, p.mass.toFixed(1)])]);
       if (signature === previous) return;
       previous = signature;

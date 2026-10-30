@@ -24,12 +24,13 @@ export class Input {
     }, { signal });
     window.addEventListener('keyup', event => { this.keys.delete(event.code); }, { signal });
     window.addEventListener('blur', () => this.reset(), { signal });
-    canvas.addEventListener('pointermove', event => {
+    window.addEventListener('pointermove', event => {
       if (event.pointerType !== 'mouse') return;
       const bounds = canvas.getBoundingClientRect();
-      this.pointer = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+      const x = event.clientX - bounds.left, y = event.clientY - bounds.top;
+      this.pointer = x >= 0 && y >= 0 && x < bounds.width && y < bounds.height ? { x, y } : null;
     }, { signal });
-    canvas.addEventListener('pointerleave', () => { this.pointer = null; }, { signal });
+    window.addEventListener('pointerout', event => { if (!event.relatedTarget) this.pointer = null; }, { signal });
     canvas.addEventListener('pointerdown', () => canvas.focus(), { signal });
   }
 

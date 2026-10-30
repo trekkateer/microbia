@@ -92,7 +92,7 @@ export class Room {
         entry.mass += actor.mass;
       }
     }
-    return [...entries.values()].sort((a, b) => b.mass - a.mass || a.id.localeCompare(b.id)).slice(0, 10);
+    return [...entries.values()].sort((a, b) => b.mass - a.mass || a.id.localeCompare(b.id)).slice(0, 5);
   }
 }
 
@@ -108,3 +108,4 @@ export function parseCommand(value: unknown): MoveCommand {
   const direction = vector(v.direction), length = Math.max(1, Math.hypot(direction.x, direction.y));
   return { direction: { x: direction.x / length, y: direction.y / length }, target: v.target === undefined ? undefined : vector(v.target), activate: v.activate === true, reproduce: v.reproduce === true, respawn: v.respawn === true };
 }
+

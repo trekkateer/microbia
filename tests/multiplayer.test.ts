@@ -20,7 +20,7 @@ describe('authoritative multiplayer pond', () => {
     top.mass = 220; top.protectedUntil = 0;
     expect(reproduce(room.world, top)).toBe(true);
     const scores = room.leaderboard();
-    expect(scores).toHaveLength(10);
+    expect(scores).toHaveLength(5);
     expect(scores[0]).toEqual({ id: 'owner-0', name: 'Person 0', speciesId: 'amoeba-proteus', mass: 220 });
     expect(scores[1].id).toBe('owner-11');
     expect(scores.every((row, i) => i === 0 || scores[i - 1].mass >= row.mass)).toBe(true);
@@ -84,7 +84,8 @@ describe('authoritative multiplayer pond', () => {
     killOrganism(room.world, a, 'test', 30); room.advance();
     expect(room.state('a').player.alive).toBe(true);
     room.leave('a'); expect(room.world.organisms.some(p => p.ownerId === 'a')).toBe(false);
-    expect(room.leaderboard().filter(p => !p.bot)).toHaveLength(1);
+    expect([...room.clients.keys()]).toEqual(['b']);
+    expect(room.world.organisms.some(p => p.ownerId === 'b' && p.alive)).toBe(true);
   });
   it('permits cross-player prey and keeps respawn local to the owner', () => {
     const room = new Room('test'); room.join('a','a','didinium-nasutum'); room.join('b','b','paramecium-caudatum');
@@ -117,3 +118,4 @@ it('Didinium can fund repeated hunts without grazing or free biomass rewards', (
   expect(a.alive).toBe(true); expect(a.reserves.energy).toBeGreaterThan(10);
   expect(didinium.diet).toHaveLength(0); expect(didiniumMetabolism.upkeepPerSecond).toBeGreaterThan(0);
 });
+

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('top ten standings show species-colored safe names, biomass and your own row', async ({ page }) => {
+test('top five standings show species-colored safe names, biomass and your own row', async ({ page }) => {
   await page.goto('/tests/browser/fixtures/local.html');
   await page.evaluate(async () => {
     const modulePath = '/src/client/ui/leaderboard.ts';
@@ -11,15 +11,15 @@ test('top ten standings show species-colored safe names, biomass and your own ro
     const board = createLeaderboard(viewport);
     board.update(Array.from({ length: 12 }, (_, i) => ({ id: `player-${i}`, name: i === 0 ? '<b>Hunter</b>' : `Player ${i}`, mass: 200 - i, speciesId: i % 2 ? 'paramecium-caudatum' : 'didinium-nasutum' })), 'player-1');
   });
-  const board = page.getByRole('region', { name: 'Top ten players and bots by biomass' });
-  await expect(board.locator('ol li')).toHaveCount(10);
+  const board = page.getByRole('region', { name: 'Top five players and bots by biomass' });
+  await expect(board.locator('ol li')).toHaveCount(5);
   await expect(board.locator('.leaderboard-name').first()).toHaveText('<b>Hunter</b>');
   await expect(board.locator('.leaderboard-name b')).toHaveCount(0);
   await expect(board.locator('[data-self="true"]')).toContainText('Player 1 (you)');
   await expect(board.locator('.leaderboard-name').first()).toHaveCSS('color', 'rgb(244, 201, 167)');
   await expect(board.locator('.leaderboard-name').nth(1)).toHaveCSS('color', 'rgb(193, 233, 240)');
   await expect(board.locator('.leaderboard-mass').first()).toHaveText('200.0');
-  await expect(board.locator('ol .species-icon')).toHaveCount(10);
+  await expect(board.locator('ol .species-icon')).toHaveCount(5);
   await expect(board.locator('ol .species-icon').first()).toHaveAttribute('data-shape', 'barrel');
   await expect(board.locator('ol .species-icon').nth(1)).toHaveAttribute('data-shape', 'slipper');
 });
