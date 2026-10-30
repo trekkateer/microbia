@@ -26,7 +26,7 @@ const server = createServer(async (req, res) => {
       const name = validateRoom(typeof body.room === 'string' ? body.room : DEFAULT_ROOM);
       if (!rooms.has(name)) { if (rooms.size >= 16) throw new Error('Server room limit reached'); rooms.set(name, new Room(name)); }
       const room = rooms.get(name)!, id = randomUUID(), token = randomUUID();
-      room.join(id, token, String(body.speciesId));
+      room.join(id, token, String(body.speciesId), typeof body.name === 'string' ? body.name : '');
       const timer = setTimeout(() => { if (!streams.has(token)) cleanup(room, id); }, 10000); timer.unref();
       return json(200, { id, token, room: name });
     }

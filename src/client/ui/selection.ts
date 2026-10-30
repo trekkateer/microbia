@@ -2,9 +2,13 @@ import type { ArenaDefinition, SpeciesDefinition } from '../../data/schemas';
 import { abilities } from '../../data/abilities/pond';
 import { DEFAULT_ROOM, playHref, validateRoom } from '../../network/room-url';
 
-export function chooseSpecies(root: HTMLElement, arena: ArenaDefinition, roster: Readonly<Record<string, SpeciesDefinition>>, initialRoom = DEFAULT_ROOM): Promise<SpeciesDefinition> {
+export function chooseSpecies(root: HTMLElement, arena: ArenaDefinition, roster: Readonly<Record<string, SpeciesDefinition>>, initialRoom = DEFAULT_ROOM, initialName = ''): Promise<SpeciesDefinition> {
   root.innerHTML = `<header class="site-header"><a class="brand" href="./"><span class="brand-cell"></span>microbia</a><div class="build-tag">LIVING POND <b>M4</b></div></header><main class="selection"><div class="eyebrow">FRESHWATER / POND WATER</div><h1>Small life. Different instincts.</h1><p class="selection-intro">Choose your organism. Let its biology shape how you play.</p><p class="selection-note">Join a shared pond with other players and bots.</p> <label>Room <input id="room-name" value="pond" maxlength="24" pattern="[a-zA-Z0-9-]+"></label><div class="roster"></div><p class="selection-note">Living pond · Five single-celled species · Mouse or WASD to move · Space for your ability</p></main>`;
   const selection = root.querySelector<HTMLElement>('.selection')!;
+  const nameLabel = document.createElement('label'); nameLabel.textContent = 'Your name ';
+  const nameInput = document.createElement('input'); nameInput.id = 'player-name'; nameInput.maxLength = 24;
+  nameInput.placeholder = 'Optional'; nameInput.setAttribute('autocomplete', 'nickname'); nameInput.value = initialName;
+  nameLabel.append(nameInput); root.querySelector('.roster')!.before(nameLabel);
   const roomInput = root.querySelector<HTMLInputElement>('#room-name')!;
   roomInput.value = validateRoom(initialRoom);
   roomInput.required = true;

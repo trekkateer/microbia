@@ -272,3 +272,8 @@ Validation: 151 simulation tests pass, including all-species starvation, resourc
 
 Isolated simulation browser checks open /tests/browser/fixtures/local.html through the Vite development server. This fixture is not included in dist or served by the production server. The public entry always joins multiplayer. The multiplayer integration and online-selection checks use the actual public entry.
 
+
+### Room leaderboard
+
+The arena sidebar shows the ten highest human players by total living colony biomass. Names use their species membrane colors, with a species legend and a (you) marker on your row. Enter an optional name on the homepage; anonymous players receive a short Player label. Names are capped at 24 characters and rendered as text. Bots do not occupy player rankings. Standings update with server snapshots and remove disconnected players.
+

@@ -1,14 +1,14 @@
 import type { MoveCommand } from '../sim/commands';
 import type { WorldSnapshot } from '../sim/types';
-import { PondDecoder } from './protocol';
+import { PondDecoder, type LeaderboardEntry } from './protocol';
 
-export async function connectPond(speciesId: string, room: string) {
-  const result = await fetch('/api/join', { signal: AbortSignal.timeout(10000), method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ speciesId, room }) });
+export async function connectPond(speciesId: string, room: string, name = '') {
+  const result = await fetch('/api/join', { signal: AbortSignal.timeout(10000), method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ speciesId, room, name }) });
   const session = await result.json();
   if (!result.ok) throw new Error(session.error ?? 'Unable to join');
   const query = new URLSearchParams(session);
   let latest: WorldSnapshot | null = null, disconnected = false, players = 0;
-  let leaderboard: { id: string; mass: number }[] = [];
+  let leaderboard: LeaderboardEntry[] = [];
   let rtt = 0, lastPing = -Infinity, tickHz = 30, tickMs = 0;
   let socket: WebSocket | undefined, events: EventSource | undefined;
   const decoder = new PondDecoder();
@@ -41,7 +41,7 @@ export async function connectPond(speciesId: string, room: string) {
   if (!upgraded) {
     // The server may have accepted a handshake whose reply was delayed. Use a
     // fresh session so closing that attempt cannot delete the fallback colony.
-    const retry = await fetch('/api/join', { signal: AbortSignal.timeout(10000), method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ speciesId, room }) });
+    const retry = await fetch('/api/join', { signal: AbortSignal.timeout(10000), method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ speciesId, room, name }) });
     const replacement = await retry.json();
     if (!retry.ok) throw new Error(replacement.error ?? 'Unable to join');
     Object.assign(session, replacement);
@@ -57,10 +57,12 @@ export async function connectPond(speciesId: string, room: string) {
   let queued: MoveCommand = { direction: { x: 0, y: 0 } };
   return {
     get state() { return latest!; },
+    get leaderboard() { return leaderboard; },
+    get playerId() { return session.id as string; },
     get status() {
       if (disconnected) return 'Disconnected - reload to rejoin';
       const health = (socket ? 'WebSocket' : 'HTTP fallback') + ' | RTT ' + (rtt ? Math.round(rtt) + ' ms' : 'measuring') + ' | Server ' + tickHz.toFixed(0) + ' Hz / ' + tickMs.toFixed(1) + ' ms';
-      return room + ' | ' + players + '/20 players | ' + health + ' | Leaders: ' + leaderboard.slice(0, 3).map(p => (p.id === session.id ? 'You' : p.id.slice(0, 4)) + ' ' + Math.round(p.mass)).join(' / ');
+      return room + ' | ' + players + '/20 players | ' + health;
     },
     send(command: MoveCommand) {
       queued = { ...command, activate: command.activate || queued.activate, reproduce: command.reproduce || queued.reproduce, respawn: command.respawn || queued.respawn };

@@ -1,5 +1,6 @@
 export const DEFAULT_ROOM = '1';
 export const SPECIES_STORAGE_KEY = 'microbia.species';
+export const NAME_STORAGE_KEY = 'microbia.name';
 
 export function validateRoom(room: string): string {
   if (!/^[a-zA-Z0-9-]{1,24}$/.test(room)) throw new Error('Use 1-24 letters, numbers or hyphens for the room');

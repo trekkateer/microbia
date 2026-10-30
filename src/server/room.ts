@@ -6,9 +6,9 @@ import type { WorldSnapshot } from '../sim/types';
 
 export class Room {
   readonly world = createWorld(arenas['pond-water'], species['amoeba-proteus']);
-  readonly clients = new Map<string, { token: string; command: MoveCommand; lastInput: number; lastSequence: number; seenInputs: Set<number> }>();
+  readonly clients = new Map<string, { token: string; name: string; command: MoveCommand; lastInput: number; lastSequence: number; seenInputs: Set<number> }>();
   constructor(readonly id: string) { this.world.player.alive = false; this.world.player.kind = 'fixture'; }
-  join(id: string, token: string, speciesId: string): void {
+  join(id: string, token: string, speciesId: string, name = ''): void {
     if (this.clients.size >= 20) throw new Error('Room full (20 players)');
     const definition = species[speciesId];
     if (!definition || !this.world.arena.roster.includes(speciesId)) throw new Error('Unknown species');
@@ -17,7 +17,8 @@ export class Room {
     if (!safeOrganismPosition(this.world, actor, 160)) throw new Error('No clear spawn');
     actor.protectedUntil = this.world.tick + 90;
     this.world.organisms.push(actor);
-    this.clients.set(id, { token, command: { direction: { x: 0, y: 0 } }, lastInput: this.world.tick, lastSequence: -1, seenInputs: new Set() });
+    const displayName = name.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || `Player ${id.slice(0, 6)}`;
+    this.clients.set(id, { token, name: displayName, command: { direction: { x: 0, y: 0 } }, lastInput: this.world.tick, lastSequence: -1, seenInputs: new Set() });
   }
   input(id: string, sequence: unknown, value: unknown): void {
     const client = this.clients.get(id);
@@ -62,7 +63,7 @@ export class Room {
     return { ...state, player, organisms: state.organisms.filter(p => p !== player) };
   }
   leaderboard() {
-    return [...this.clients.keys()].map(id => ({ id, speciesId: this.world.organisms.find(p => p.ownerId === id)?.speciesId, mass: this.world.organisms.filter(p => p.ownerId === id && p.alive).reduce((sum, p) => sum + p.mass, 0) })).sort((a, b) => b.mass - a.mass);
+    return [...this.clients].map(([id, client]) => ({ id, name: client.name, speciesId: this.world.organisms.find(p => p.ownerId === id)?.speciesId, mass: this.world.organisms.filter(p => p.ownerId === id && p.alive).reduce((sum, p) => sum + p.mass, 0) })).sort((a, b) => b.mass - a.mass || a.id.localeCompare(b.id)).slice(0, 10);
   }
 }
 

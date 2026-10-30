@@ -8,7 +8,8 @@ import { createHud } from './ui/hud';
 import { nutrition } from '../data/nutrition';
 import './style.css';
 import { connectPond } from '../network/client';
-import { roomFromSearch, selectionHref, SPECIES_STORAGE_KEY } from '../network/room-url';
+import { roomFromSearch, selectionHref, SPECIES_STORAGE_KEY, NAME_STORAGE_KEY } from '../network/room-url';
+import { createLeaderboard } from './ui/leaderboard';
 
 async function start(): Promise<void> {
   const arena = arenas['pond-water'];
@@ -22,11 +23,13 @@ async function start(): Promise<void> {
     return;
   }
   const organism = species[speciesId];
+  let name = new URLSearchParams(location.search).get('name') ?? '';
+  if (!name) { try { name = sessionStorage.getItem(NAME_STORAGE_KEY) ?? ''; } catch { /* Anonymous name is assigned by the server. */ } }
   document.title = `Room ${room} · microbia`;
   root.innerHTML = '<header class="site-header"><a class="brand" href="/">microbia</a></header><main class="selection"><h1>Joining the pond...</h1><p role="status"></p></main>';
   root.querySelector('[role="status"]')!.textContent = `Room ${room} · ${organism.name}`;
   let network: Awaited<ReturnType<typeof connectPond>>;
-  try { network = await connectPond(organism.id, room); }
+  try { network = await connectPond(organism.id, room, name); }
   catch (error) {
     const notice = document.createElement('p');
     notice.setAttribute('role', 'alert');
@@ -37,6 +40,7 @@ async function start(): Promise<void> {
     return;
   }
   const hud = createHud(root, arena, organism, nutrition, room);
+  const leaderboard = createLeaderboard(root.querySelector<HTMLElement>('.viewport')!);
   const app = new Application();
   try {
     await app.init({ resizeTo: hud.host, background: arena.theme.background, antialias: true, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl' });
@@ -84,6 +88,7 @@ async function start(): Promise<void> {
     app.canvas.setAttribute('aria-description', network.status); status.textContent = network.status + ' | FPS ' + Math.round(ticker.FPS);
     if (current.tick !== lastHudTick) {
       hud.update(current.player, current.tick, current.organisms);
+      leaderboard.update(network.leaderboard, network.playerId);
       lastHudTick = current.tick;
     }
   });

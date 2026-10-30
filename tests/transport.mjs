@@ -38,6 +38,9 @@ test('live WebSocket transport authenticates, streams state, applies input and c
   const until = async predicate => { while (!frames.some(predicate)) await new Promise(resolve => pending.push(resolve)); return frames.find(predicate); };
   await once(ws, 'open');
   const first = await until(p => p.resetFood === true);
+  assert.ok(first.leaderboard.length <= 10);
+  assert.equal(first.leaderboard[0].speciesId, 'paramecium-caudatum');
+  assert.ok(first.leaderboard[0].name.startsWith('Player '));
   assert.ok(first.timing.tickHz > 0);
   const x = first.own[0].x;
   for (let sequence = 0; sequence < 5; sequence++) {

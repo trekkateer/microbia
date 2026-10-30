@@ -1,4 +1,18 @@
 :root { font-family: 'Segoe UI', Arial, sans-serif; color: #173b38; background: #f2f1e9; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+.arena-sidebar { top: 28px; right: 28px; width: 228px; max-height: calc(100% - 270px); overflow-y: auto; pointer-events: auto; scrollbar-width: thin; scrollbar-color: #6c9684 #0a2829; }
+.arena-sidebar.overlay { pointer-events: auto; }
+.leaderboard { padding: 16px; border: 1px solid #a4c7a433; border-radius: 12px; background: #0a2829eb; }
+.leaderboard h2 { font: 24px Georgia, serif; margin: 0; color: #e3ead9; }
+.leaderboard > p { font-size: 8px; letter-spacing: 1.4px; color: #a5baad; margin: 7px 0 13px; }
+.leaderboard ol { list-style: none; padding: 0; margin: 0; }
+.leaderboard li { display: grid; grid-template-columns: 17px minmax(0, 1fr) auto; gap: 5px; padding: 7px 3px; border-top: 1px solid #a4c7a415; align-items: center; font-size: 11px; }
+.leaderboard li[data-self="true"] { background: #b6d2a512; border-radius: 4px; }
+.leaderboard-rank { font-size: 9px; color: #9eb4aa; }
+.leaderboard-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.leaderboard-mass { font-variant-numeric: tabular-nums; color: #e3ead9; font-size: 10px; }
+.leaderboard-legend { display: flex; flex-wrap: wrap; gap: 5px 9px; margin-top: 13px; font-size: 8px; }
+.arena-sidebar .food-guide { position: static; width: 100%; max-height: none; margin-top: 10px; }
+@media (max-width: 680px) { .arena-sidebar { top: 20px; right: 16px; width: 150px; max-height: calc(100% - 220px); } .leaderboard { padding: 11px; } .leaderboard h2 { font-size: 20px; } .leaderboard li { font-size: 9px; gap: 3px; } .viewport .arena-heading { max-width: calc(100% - 195px); } }
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, a { -webkit-tap-highlight-color: transparent; }

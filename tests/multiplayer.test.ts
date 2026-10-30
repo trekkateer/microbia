@@ -9,6 +9,27 @@ import { didinium } from '../src/data/species/didinium';
 import { didiniumMetabolism } from '../src/data/metabolism/ciliates';
 
 describe('authoritative multiplayer pond', () => {
+  it('ranks the ten highest human colony totals with names and species, without counting bots or dead daughters', () => {
+    const room = new Room('scores');
+    for (let i = 0; i < 12; i++) {
+      room.join(`owner-${i}`, `token-${i}`, 'amoeba-proteus', `  Person ${i}\n`);
+      room.world.organisms.find(p => p.ownerId === `owner-${i}`)!.mass = 25 + i;
+    }
+    const top = room.world.organisms.find(p => p.ownerId === 'owner-0')!;
+    top.mass = 220; top.protectedUntil = 0;
+    expect(reproduce(room.world, top)).toBe(true);
+    const scores = room.leaderboard();
+    expect(scores).toHaveLength(10);
+    expect(scores[0]).toEqual({ id: 'owner-0', name: 'Person 0', speciesId: 'amoeba-proteus', mass: 220 });
+    expect(scores[1].id).toBe('owner-11');
+    expect(scores.every((row, i) => i === 0 || scores[i - 1].mass >= row.mass)).toBe(true);
+    expect(scores.every(row => row.id.startsWith('owner-'))).toBe(true);
+    const daughter = room.world.organisms.find(p => p.parentId === top.id)!;
+    daughter.alive = false;
+    expect(room.leaderboard()[0].mass).toBe(110);
+    room.leave('owner-0');
+    expect(room.leaderboard().some(row => row.id === 'owner-0')).toBe(false);
+  });
   it('populates shared rooms with bots before the first human joins and keeps them alongside human players', () => {
     const room = new Room('shared');
     const bots = room.world.organisms.filter(p => p.alive && p.kind === 'ai');

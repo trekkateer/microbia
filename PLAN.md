@@ -273,3 +273,8 @@ Validation: 158 unit tests, the live WebSocket/SSE transport test and both produ
 
 The homepage is a separate entry for lobby/species selection, navigating to /play?room=1 by default. Arena HTML is built separately under play/index.html and served explicitly for /play and /play/; no SPA fallback handles arena routes. Room query parameters preserve numbered or existing named room IDs across direct invites, refresh, and species changes. New visitors return to the picker with their requested room before joining. Species selection uses session storage, with an explicit species parameter fallback if storage is unavailable. Room validation and the default 1 are shared with the server. All 160 unit tests, both production builds and the live WebSocket/SSE transport check including direct HTML routes pass. Browser UI checks remain limited by the environment's Edge launch failure.
 
+
+## Top-ten biomass leaderboard
+
+Added an arena sidebar with server-ranked human colony biomass, species-colored display names, rank, biomass, a species color legend and an own-player marker. Leaderboard data includes names and species IDs; server returns only the top ten, excludes dead cell biomass and bots, breaks ties consistently and removes disconnected players. An optional name field persists for the browser session and is sanitized/capped on the server; names are rendered with textContent. Food guide shares a scrollable sidebar so the panels do not overlap. All 161 unit tests and both builds pass; live transport coverage checks leaderboard species and anonymous names. Browser DOM/color coverage added; environment Edge launch restrictions still limit browser execution.
+

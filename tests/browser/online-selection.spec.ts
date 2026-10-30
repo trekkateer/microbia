@@ -13,7 +13,7 @@ test('selection always joins the shared pond and never starts a local game when 
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page).toHaveURL(/\/play\?room=1$/);
   await expect(page.getByRole('alert')).toContainText('Could not join the pond');
-  expect(joined).toEqual({ speciesId: 'amoeba-proteus', room: '1' });
+  expect(joined).toEqual({ speciesId: 'amoeba-proteus', room: '1', name: '' });
   await expect(page.locator('canvas')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Try again', exact: true })).toBeVisible();
 });
@@ -32,7 +32,7 @@ test('shared arena links preserve the room through species selection and refresh
   await page.getByRole('button', { name: 'Play as Paramecium', exact: true }).click();
   await expect(page).toHaveURL(/\/play\?room=2$/);
   await expect(page.getByRole('alert')).toBeVisible();
-  expect(joins[0]).toEqual({ speciesId: 'paramecium-caudatum', room: '2' });
+  expect(joins[0]).toEqual({ speciesId: 'paramecium-caudatum', room: '2', name: '' });
   await page.reload();
   await expect(page.getByRole('alert')).toBeVisible();
   expect(joins).toHaveLength(2);
