@@ -3,14 +3,15 @@ import { Room, parseCommand } from '../src/server/room';
 import { sameColony } from '../src/sim/systems/colonies';
 import { playerCells } from '../src/sim/systems/player-control';
 import { reproduce } from '../src/sim/systems/reproduction';
-import { killOrganism } from '../src/sim/systems/lifecycle';
+import { killOrganism, respawnOrganism } from '../src/sim/systems/lifecycle';
 import { eligiblePrey } from '../src/sim/systems/abilities';
 import { didinium } from '../src/data/species/didinium';
 import { didiniumMetabolism } from '../src/data/metabolism/ciliates';
 
 describe('authoritative multiplayer pond', () => {
-  it('ranks the ten highest human colony totals with names and species, without counting bots or dead daughters', () => {
+  it('ranks human colony totals with names and species without counting dead daughters', () => {
     const room = new Room('scores');
+    room.world.organisms = [];
     for (let i = 0; i < 12; i++) {
       room.join(`owner-${i}`, `token-${i}`, 'amoeba-proteus', `  Person ${i}\n`);
       room.world.organisms.find(p => p.ownerId === `owner-${i}`)!.mass = 25 + i;
@@ -29,6 +30,30 @@ describe('authoritative multiplayer pond', () => {
     expect(room.leaderboard()[0].mass).toBe(110);
     room.leave('owner-0');
     expect(room.leaderboard().some(row => row.id === 'owner-0')).toBe(false);
+  });
+  it('includes named bot colonies alongside humans and preserves names through division, founder death and respawn', () => {
+    const room = new Room('bot-scores');
+    const bot = room.world.organisms.find(p => p.kind === 'ai' && p.speciesId === 'amoeba-proteus')!;
+    for (const actor of room.world.organisms) actor.mass = 1;
+    room.join('human', 'token', 'paramecium-caudatum', 'Human');
+    room.world.organisms.find(p => p.ownerId === 'human')!.mass = 150;
+    bot.mass = 220; bot.protectedUntil = 0;
+    const first = room.leaderboard()[0];
+    expect(first.bot).toBe(true); expect(first.name).toBeTruthy(); expect(first.mass).toBe(220);
+    expect(room.leaderboard().some(p => p.id === 'human')).toBe(true);
+    const names = room.leaderboard().filter(p => p.bot).map(p => p.name);
+    expect(new Set(names).size).toBe(names.length);
+    expect(reproduce(room.world, bot)).toBe(true);
+    expect(room.leaderboard().find(p => p.id === first.id)).toEqual(first);
+    const daughter = room.world.organisms.find(p => p.parentId === bot.id)!;
+    killOrganism(room.world, bot, 'test', 30);
+    expect(room.leaderboard().find(p => p.id === first.id)).toMatchObject({ name: first.name, mass: 110 });
+    killOrganism(room.world, daughter, 'test', 30);
+    expect(room.leaderboard().some(p => p.id === first.id)).toBe(false);
+    room.world.tick = bot.respawnAtTick;
+    expect(respawnOrganism(room.world, bot, 30)).toBe(true);
+    expect(room.leaderboard().find(p => p.id === first.id)).toMatchObject({ name: first.name, bot: true, mass: bot.mass });
+    expect(room.clients.size).toBe(1);
   });
   it('populates shared rooms with bots before the first human joins and keeps them alongside human players', () => {
     const room = new Room('shared');
@@ -59,7 +84,7 @@ describe('authoritative multiplayer pond', () => {
     killOrganism(room.world, a, 'test', 30); room.advance();
     expect(room.state('a').player.alive).toBe(true);
     room.leave('a'); expect(room.world.organisms.some(p => p.ownerId === 'a')).toBe(false);
-    expect(room.leaderboard()).toHaveLength(1);
+    expect(room.leaderboard().filter(p => !p.bot)).toHaveLength(1);
   });
   it('permits cross-player prey and keeps respawn local to the owner', () => {
     const room = new Room('test'); room.join('a','a','didinium-nasutum'); room.join('b','b','paramecium-caudatum');

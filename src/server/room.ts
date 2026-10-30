@@ -3,11 +3,28 @@ import { createWorld, createOrganism, safeOrganismPosition, snapshot } from '../
 import { step } from '../sim/step';
 import type { MoveCommand } from '../sim/commands';
 import type { WorldSnapshot } from '../sim/types';
+import type { LeaderboardEntry } from '../network/protocol';
+
+const BOT_NAMES = ['Moss', 'Ripple', 'Pebble', 'Willow', 'Clover', 'Dewdrop', 'Fern', 'Reed', 'Lotus', 'Brook', 'Cress', 'Sprout', 'Drift', 'Sedge', 'Marsh', 'Bloom', 'Wisp', 'Basil', 'Puddle', 'Lichen', 'Cedar', 'Silt', 'Minnow', 'Aster'];
+const founderId = (colonyId: string) => colonyId.includes(':') ? colonyId.slice(0, colonyId.lastIndexOf(':')) : colonyId;
 
 export class Room {
   readonly world = createWorld(arenas['pond-water'], species['amoeba-proteus']);
   readonly clients = new Map<string, { token: string; name: string; command: MoveCommand; lastInput: number; lastSequence: number; seenInputs: Set<number> }>();
-  constructor(readonly id: string) { this.world.player.alive = false; this.world.player.kind = 'fixture'; }
+  private readonly botNames = new Map<string, string>();
+  constructor(readonly id: string) {
+    this.world.player.alive = false; this.world.player.kind = 'fixture';
+    for (const actor of this.world.organisms) if (actor.kind === 'ai') this.botName(founderId(actor.colonyId));
+  }
+  private botName(founder: string): string {
+    let name = this.botNames.get(founder);
+    if (!name) {
+      const index = this.botNames.size;
+      name = BOT_NAMES[index % BOT_NAMES.length] + (index >= BOT_NAMES.length ? ` ${Math.floor(index / BOT_NAMES.length) + 1}` : '');
+      this.botNames.set(founder, name);
+    }
+    return name;
+  }
   join(id: string, token: string, speciesId: string, name = ''): void {
     if (this.clients.size >= 20) throw new Error('Room full (20 players)');
     const definition = species[speciesId];
@@ -63,7 +80,19 @@ export class Room {
     return { ...state, player, organisms: state.organisms.filter(p => p !== player) };
   }
   leaderboard() {
-    return [...this.clients].map(([id, client]) => ({ id, name: client.name, speciesId: this.world.organisms.find(p => p.ownerId === id)?.speciesId, mass: this.world.organisms.filter(p => p.ownerId === id && p.alive).reduce((sum, p) => sum + p.mass, 0) })).sort((a, b) => b.mass - a.mass || a.id.localeCompare(b.id)).slice(0, 10);
+    const entries = new Map<string, LeaderboardEntry>([...this.clients].map(([id, client]) => [id, { id, name: client.name, mass: 0 }]));
+    for (const actor of this.world.organisms) {
+      if (actor.kind === 'player' && actor.ownerId) {
+        const entry = entries.get(actor.ownerId);
+        if (entry) { entry.speciesId = actor.speciesId; if (actor.alive) entry.mass += actor.mass; }
+      } else if (actor.kind === 'ai' && actor.alive) {
+        const founder = founderId(actor.colonyId), id = `bot:${founder}`;
+        let entry = entries.get(id);
+        if (!entry) { entry = { id, name: this.botName(founder), speciesId: actor.speciesId, mass: 0, bot: true }; entries.set(id, entry); }
+        entry.mass += actor.mass;
+      }
+    }
+    return [...entries.values()].sort((a, b) => b.mass - a.mass || a.id.localeCompare(b.id)).slice(0, 10);
   }
 }
 

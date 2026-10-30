@@ -278,3 +278,8 @@ The homepage is a separate entry for lobby/species selection, navigating to /pla
 
 Added an arena sidebar with server-ranked human colony biomass, species-colored display names, rank, biomass, a species color legend and an own-player marker. Leaderboard data includes names and species IDs; server returns only the top ten, excludes dead cell biomass and bots, breaks ties consistently and removes disconnected players. An optional name field persists for the browser session and is sanitized/capped on the server; names are rendered with textContent. Food guide shares a scrollable sidebar so the panels do not overlap. All 161 unit tests and both builds pass; live transport coverage checks leaderboard species and anonymous names. Browser DOM/color coverage added; environment Edge launch restrictions still limit browser execution.
 
+
+## Named bots and leaderboard species icons
+
+Every seeded AI colony receives a stable unique pond-themed name. Leaderboard aggregation now combines living bot colony biomass with human colony scores in one top ten, retaining names after division, founder death and respawn without double-counting daughters. Bot rows are marked separately from people and do not affect human room capacity. Added five distinct inline SVG species silhouettes to the left of leaderboard names; names retain species colors. All 162 unit tests, both production builds and the live transport check pass. Browser icon/marker coverage added; browser execution remains limited by the existing Edge launch issue.
+

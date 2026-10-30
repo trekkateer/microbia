@@ -275,5 +275,5 @@ Isolated simulation browser checks open /tests/browser/fixtures/local.html throu
 
 ### Room leaderboard
 
-The arena sidebar shows the ten highest human players by total living colony biomass. Names use their species membrane colors, with a species legend and a (you) marker on your row. Enter an optional name on the homepage; anonymous players receive a short Player label. Names are capped at 24 characters and rendered as text. Bots do not occupy player rankings. Standings update with server snapshots and remove disconnected players.
+The arena sidebar shows the ten highest human and bot colonies by total living biomass. Names use their species membrane colors, with a species legend and a (you) marker on your row. Enter an optional name on the homepage; anonymous players receive a short Player label. Names are capped at 24 characters and rendered as text. Named bot colonies compete in the same rankings and carry a bot marker. Each row includes a tiny species silhouette immediately before the name. Bot names stay with their colony through division and respawn. Standings update with server snapshots and remove disconnected players.
 

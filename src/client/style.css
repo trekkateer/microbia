@@ -5,7 +5,8 @@
 .leaderboard h2 { font: 24px Georgia, serif; margin: 0; color: #e3ead9; }
 .leaderboard > p { font-size: 8px; letter-spacing: 1.4px; color: #a5baad; margin: 7px 0 13px; }
 .leaderboard ol { list-style: none; padding: 0; margin: 0; }
-.leaderboard li { display: grid; grid-template-columns: 17px minmax(0, 1fr) auto; gap: 5px; padding: 7px 3px; border-top: 1px solid #a4c7a415; align-items: center; font-size: 11px; }
+.leaderboard li { display: grid; grid-template-columns: 17px 18px minmax(0, 1fr) auto; gap: 5px; padding: 7px 3px; border-top: 1px solid #a4c7a415; align-items: center; font-size: 11px; }
+.species-icon { display: block; width: 18px; height: 18px; flex-shrink: 0; }
 .leaderboard li[data-self="true"] { background: #b6d2a512; border-radius: 4px; }
 .leaderboard-rank { font-size: 9px; color: #9eb4aa; }
 .leaderboard-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
