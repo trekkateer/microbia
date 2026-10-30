@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Space rejects distant engulfing, and only the first nearby hunter can attack', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {
@@ -44,7 +44,7 @@ test('Space rejects distant engulfing, and only the first nearby hunter can atta
 test('engulf silhouette reaches, wraps, seals, swallows and retracts without hiding organelles', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {

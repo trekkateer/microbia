@@ -35,8 +35,8 @@ idle and are not a performance target.
 2. In Render, create a **Blueprint** from the repository and review `render.yaml`.
 3. Deploy, then open the service's HTTPS `onrender.com` address. No separate API
    URL or CORS configuration is needed. Render supplies `PORT` and terminates TLS.
-4. Check `/healthz` returns `200` with `{"status":"ok"}`. On two devices, enable
-   **Multiplayer prototype**, join the same room, and verify movement, division,
+4. Check `/healthz` returns `200` with `{"status":"ok"}`. On two devices,
+   join the same room and verify movement, division,
    hunger, leaderboard updates and disconnect cleanup.
 5. Watch CPU, memory and outbound bandwidth while testing. Choose a region near
    the players (the initial configuration uses Ohio).
@@ -59,10 +59,11 @@ Tested with Node.js 26.10.0 and npm 12.1.0.
 
 ```sh
 npm ci
-npm run dev
+npm run build:prototype
+npm start
 ```
 
-Open the address printed by Vite, normally http://127.0.0.1:5173. If that port is occupied, Vite uses the next free one. Keep the terminal running; Ctrl+C stops it. This milestone targets desktop mouse/keyboard with WebGL; touch controls arrive in M6.
+Open http://localhost:3000. Every game joins a shared server room with bots and any other people in that room. The default room is `pond`; enter another room name to play together separately. Keep the terminal running; Ctrl+C stops it. This milestone targets desktop mouse/keyboard with WebGL; touch controls arrive in M6.
 
 ## Play and check M4
 
@@ -70,15 +71,14 @@ Choose a species. Steer your cells with the mouse, WASD or arrow keys. Mouse ste
 
 ### Reproduction
 
-Switching tabs keeps the pond running. Multiplayer continues on the server;
-local play transfers simulation to a worker while hidden and resumes from that
-state when you return. Controls reset on switching away, and hidden tabs skip
-rendering. Browser tab suspension/discard or putting the computer to sleep can
-still suspend local play; multiplayer keeps running while the server is available.
+Switching tabs keeps the pond running on the server. Controls reset on switching
+away, and hidden tabs skip rendering. Your cells remain in the shared world and
+can feed, starve or be eaten while you are away. A discarded tab or lost connection
+can require rejoining.
 
 Division now has a 1.2-second membrane animation: a daughter forms gradually,
 the cells ease apart, and the connecting neck narrows and separates. Organelles
-scale with each cell. The visual runs for players and AI in local and multiplayer
+scale with each cell. The visual runs for players and AI in shared
 ponds; authoritative biomass, nutrition and collisions still split immediately.
 
 | Species | Minimum fraction of maximum biomass | Mass needed per cell |
@@ -131,7 +131,7 @@ Manual checks: grow to the displayed threshold, press R, confirm two **YOU**/pla
 6. **Single-celled life only:** all pond organisms are unicellular. Watch for Amoeba and Didinium predators; no multicellular organisms are included.
 7. **Death and respawn:** being eaten shows the cause of death. After three seconds, click **Respawn** to return as the same species at starting mass with clean inventories, fresh reserves and reset abilities. The new position avoids living bodies. A soft ring marks three seconds of protection; neither side can attack during this settling period. AI organisms return after seven seconds to keep the pond populated.
 8. **Nutrition:** open **Absorbed nutrients** to inspect current stock. Watch prey enter digestion before it contributes to growth. AI organisms have independent inventories and pay the same feeding, growth and ability costs.
-9. Resize the window, or switch tabs and return. The canvas resizes, input clears on focus loss, and the pond continues running while hidden. **Change species** starts a fresh local pond.
+9. Resize the window, or switch tabs and return. The canvas resizes, input clears on focus loss, and the pond continues running while hidden. **Change species** returns to room and species selection.
 
 | Playable species | Passive / diet | Space | Cost / cooldown | Weakness |
 | --- | --- | --- | --- | --- |
@@ -186,7 +186,7 @@ npm run test:browser
 ```
 
 - **132 simulation/render-state tests:** feeding, environment, lifecycle, uncapped division, nutrient transfer losses, emergency fleeing, colony steering, movement-based Amoeba targeting, ability animation lifetimes and collision regressions, alongside reproduction and resource conservation.
-- **Production build:** TypeScript checks and `dist/` output. `npm run preview` serves it locally.
+- **Production build:** TypeScript checks and `dist/` output. `npm start` serves the built game and multiplayer API.
 - **25 browser tests:** five-species selection, feeding, all kits, producer growth, environment feedback, AI, death/respawn, R division, absorption animations on both controlled cells, group steering, closest-cell attacks, continued survival and resizing. They use installed Microsoft Edge and a local server on port 4173. Screenshots are in `test-results/`. To use installed Chrome in PowerShell, set `$env:PLAYWRIGHT_CHANNEL = 'chrome'` first.
 
 Browser tests enable a development-only simulation hook for controlled combat setups; ordinary development and production builds do not expose it. Live ecosystem and respawn checks run the real simulation.
@@ -211,7 +211,7 @@ npm run build:prototype
 npm start
 ```
 
-Open http://localhost:3000. Enable **Multiplayer prototype**, enter a room name, then choose your species. Open a second browser tab with the same room name to play together. Each player owns a separate colony; mouse/WASD, Space, R and respawn work through the server. Rooms accept 20 players and show live counts and a biomass leaderboard. A different room name creates an isolated pond. Local play remains available with the checkbox off.
+Open http://localhost:3000, enter a room name (default `pond`), then choose your species. Every game is multiplayer; there is no local-play toggle or offline fallback. Rooms include AI bots even when you are the only human. Open a second browser tab with the same room name to play together. Each player owns a separate colony; mouse/WASD, Space, R and respawn work through the server. Rooms accept 20 players and show live counts and a biomass leaderboard. A different room name creates a separate shared pond.
 
 For another computer on the same network, open `http://<server-LAN-IP>:3000`; both players must use the same server address and room name. Public internet play requires hosting the Node server with HTTPS and a reverse proxy that allows unbuffered `/api/events` responses. This change does not deploy a public server. Set `PORT` and `HOST` to configure listening (defaults: 3000 and 0.0.0.0).
 
@@ -250,3 +250,8 @@ Sustained maintenance shortages drain a full hunger bar in about 45 seconds. A f
 Cells at or below 25% cannot divide. Otherwise the existing species mass thresholds and uncapped reproduction remain. Daughters inherit their parent's hunger percentage and accumulated starvation time; biomass, inventories and reserves still split equally. Respawn starts a new, fully nourished organism. Controlled simulation fixtures without a lifecycle continue to clamp at the mass floor, while actual local/multiplayer ponds enforce starvation death.
 
 Validation: 151 simulation tests pass, including all-species starvation, resource-poor AI colony loss, carbon-only deficiency, balanced recovery, photosynthetic survival, division demand conservation, respawn and multiplayer hunger state. The hunger-bar browser check is in `tests/browser/hunger.spec.ts`; browser execution remains blocked here by local connection EACCES. Rebuild/restart with `npm run build:prototype` then `npm start`, and reload clients together.
+
+### Browser test fixtures
+
+Isolated simulation browser checks open /tests/browser/fixtures/local.html through the Vite development server. This fixture is not included in dist or served by the production server. The public entry always joins multiplayer. The multiplayer integration and online-selection checks use the actual public entry.
+

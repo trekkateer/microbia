@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 test('hunger bar warns of starvation and shows the death reason',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'Play as Paramecium',exact:true}).click();
+  await page.goto('/tests/browser/fixtures/local.html');await page.getByRole('button',{name:'Play as Paramecium',exact:true}).click();
   const bar=page.getByRole('progressbar',{name:'Nourishment',exact:true});
   await expect(bar).toHaveAttribute('aria-valuenow','100');
   await page.evaluate(()=>{const w=window.__microbiaTest!.world;w.organisms=[];w.foodParticles=[];w.player.satiety=0;w.player.hungryTicks=0;w.player.protectedUntil=0;for(const id of Object.keys(w.player.reserves))w.player.reserves[id]=0;});

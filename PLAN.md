@@ -261,3 +261,10 @@ User requested outward knockback instead of self-reversal. Paramecium now uses a
 
 Latency verification: 157 unit tests, both production builds, and the real local WebSocket/HTTP transport integration check pass. Deployed commit 763f08f. A 35-snapshot probe through www.microbia.us measured median acknowledgment RTT 29ms, median snapshot gap 67ms, maximum gap 164ms and effective simulation rate 29Hz; the sampled server step was 2.36ms. These are brief measurements from this environment through its configured proxy, not a guarantee for every player or crowded pond. Paid hosting remains unchanged.
 
+
+## Multiplayer-only entry
+
+All public play now connects to the authoritative shared pond. Removed the multiplayer checkbox, local simulation fallback and background worker from the production client entry. Rooms retain their existing bots and admit other humans, defaulting to pond. Lobby refresh runs automatically; join failures offer retry without starting an offline world. Isolated browser simulation checks use development-only fixtures under tests/browser/fixtures, excluded from the production build. Added coverage for bots alongside human owners and multiplayer-only selection/join failure.
+
+Validation: 158 unit tests, the live WebSocket/SSE transport test and both production builds pass. The multiplayer-only browser check was added but Edge fails to launch in this environment. Production output excludes the development-only simulation fixture and background simulation worker.
+

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('body drawing is reused between ticks while swimming still interpolates', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {
@@ -27,7 +27,7 @@ test('body drawing is reused between ticks while swimming still interpolates', a
 });
 
 test('off-screen cells skip drawing and shared organelles survive removal of a sibling', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {
@@ -59,7 +59,7 @@ test('crowded pond performance sample with 32, 64 and 128 living cells', async (
   test.setTimeout(120000);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   const profiler = process.env.POND_PROFILE ? await page.context().newCDPSession(page) : null;

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('selection explains all five fixed kits and works with keyboard', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await expect(page.locator('.roster-card')).toHaveCount(5);
   await expect(page.locator('.roster')).toContainText('Phagocytosis');
   await expect(page.locator('.roster')).toContainText('Specialist hunter');
@@ -19,7 +19,7 @@ for (const name of ['Amoeba', 'Paramecium', 'Didinium']) {
   test(`${name} can use its kit against a controlled target with solid collisions`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('/');
+    await page.goto('/tests/browser/fixtures/local.html');
     await page.getByRole('button', { name: `Play as ${name}`, exact: true }).click();
     await expect(page.locator('canvas')).toBeVisible();
     await expect(page.locator('#loading')).toBeHidden();

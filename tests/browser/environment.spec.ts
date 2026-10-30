@@ -4,7 +4,7 @@ for (const name of ['Euglena', 'Diatom']) {
   test(`${name} grows from dissolved resources and uses its new ability`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('/');
+    await page.goto('/tests/browser/fixtures/local.html');
     await page.getByRole('button', { name: `Play as ${name}`, exact: true }).click();
     await expect(page.locator('canvas')).toBeVisible();
     await expect(page.locator('#loading')).toBeHidden();
@@ -37,7 +37,7 @@ for (const name of ['Euglena', 'Diatom']) {
 }
 
 test('shade and cold currents give visible feedback with real simulation effects', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Euglena', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(() => {

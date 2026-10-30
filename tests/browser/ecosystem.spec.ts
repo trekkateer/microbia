@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('dividing AI forms a moving colony whose daughters stay together', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   const start = await page.evaluate(async () => {
@@ -29,7 +29,7 @@ test('dividing AI forms a moving colony whose daughters stay together', async ({
 test('the pond renders only five single-celled species, with moving AI', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.locator('#population')).toContainText('Single-celled life');
@@ -47,7 +47,7 @@ test('the pond renders only five single-celled species, with moving AI', async (
 test('a Didinium kills the player and the respawn button returns a fresh, protected organism', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Paramecium', exact: true }).click();
   await expect(page.locator('canvas')).toBeVisible();
   await page.evaluate(async () => {

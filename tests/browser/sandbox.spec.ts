@@ -6,7 +6,7 @@ import { amoeba } from '../../src/data/species/amoeba';
 test('pond renders and mouse steering eats food', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await expect(page.getByRole('heading', { name: 'Pond Water', exact: true })).toBeVisible();
@@ -40,7 +40,7 @@ test('pond renders and mouse steering eats food', async ({ page }, testInfo) => 
 });
 
 test('keyboard feeding and viewport resize work', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   const bounds = (await page.locator('canvas').boundingBox())!;

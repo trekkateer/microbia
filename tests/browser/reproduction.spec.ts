@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('R divides into two controlled cells, conserves colony biomass and keeps steering both', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await expect(page.locator('#reproduction-status')).toContainText('213.75 mass (95%)');
@@ -37,7 +37,7 @@ test('R divides into two controlled cells, conserves colony biomass and keeps st
 });
 
 test('both controlled cells show their own absorption pulse', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {
@@ -70,7 +70,7 @@ test('both controlled cells show their own absorption pulse', async ({ page }, t
 });
 
 test('movement targeting launches only the closest forward-facing hunter', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {
@@ -97,7 +97,7 @@ test('movement targeting launches only the closest forward-facing hunter', async
 });
 
 test('the round continues after one daughter dies, then respawns as one cell after all are lost', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/tests/browser/fixtures/local.html');
   await page.getByRole('button', { name: 'Play as Paramecium', exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 for (const name of ['Paramecium', 'Didinium', 'Euglena', 'Diatom']) test(`${name} ability has distinct animated stages and a fading finish`, async ({ page }, testInfo) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/'); await page.getByRole('button', { name: `Play as ${name}`, exact: true }).click();
+  await page.goto('/tests/browser/fixtures/local.html'); await page.getByRole('button', { name: `Play as ${name}`, exact: true }).click();
   await expect(page.locator('#loading')).toBeHidden();
   await page.evaluate(async () => {
     const rendererPath = '/src/client/rendering/pond-renderer.ts', worldPath = '/src/sim/world.ts', abilityPath = '/src/data/abilities/pond.ts', growthPath = '/src/sim/systems/growth.ts';

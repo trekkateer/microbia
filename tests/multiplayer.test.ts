@@ -9,6 +9,18 @@ import { didinium } from '../src/data/species/didinium';
 import { didiniumMetabolism } from '../src/data/metabolism/ciliates';
 
 describe('authoritative multiplayer pond', () => {
+  it('populates shared rooms with bots before the first human joins and keeps them alongside human players', () => {
+    const room = new Room('shared');
+    const bots = room.world.organisms.filter(p => p.alive && p.kind === 'ai');
+    expect(bots.length).toBeGreaterThan(0);
+    room.join('a', 'a', 'amoeba-proteus'); room.join('b', 'b', 'paramecium-caudatum');
+    room.advance();
+    expect(room.state('a').organisms.some(p => p.kind === 'ai' && p.alive)).toBe(true);
+    expect(room.state('a').organisms.some(p => p.ownerId === 'b' && p.alive)).toBe(true);
+    expect(room.clients.size).toBe(2);
+    room.leave('a');
+    expect(room.state('b').organisms.some(p => p.kind === 'ai' && p.alive)).toBe(true);
+  });
   it('moves owners independently, inherits ownership on division, isolates rooms and removes disconnected colonies', () => {
     const room = new Room('one'), other = new Room('two');
     room.join('a', 'secret-a', 'amoeba-proteus'); room.join('b', 'secret-b', 'paramecium-caudatum');

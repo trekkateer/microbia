@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 test('two browser players share a live pond, own separate cells, and disconnect cleanly', async ({ browser }) => {
   const a = await browser.newPage(), b = await browser.newPage();
-  for (const page of [a,b]) { await page.goto('http://127.0.0.1:3000'); await page.locator('#online-mode').check(); await page.locator('#room-name').fill('browser-test'); }
+  for (const page of [a,b]) { await page.goto('http://127.0.0.1:3000'); await page.locator('#room-name').fill('browser-test'); }
   await a.getByRole('button', { name: 'Play as Didinium', exact: true }).click();
   await b.getByRole('button', { name: 'Play as Paramecium', exact: true }).click();
   await expect(a.locator('canvas')).toBeVisible(); await expect(b.locator('canvas')).toBeVisible();
