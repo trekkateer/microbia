@@ -269,3 +269,12 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 .index-play-link a { color: #d6e7c9; text-underline-offset: 4px; }
 @media (min-width: 681px) and (max-width: 1000px) { .species-reference .roster-full { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 680px) { .species-reference { padding: 24px 16px; } .species-reference .roster-full { grid-template-columns: 1fr; } .species-reference .roster-card { padding: 16px; } }
+/* Shared card heading: cell illustration beside the species names. */
+.species-card-heading { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.species-card-title { min-width: 0; }
+.species-card-title .scientific-name { display: block; line-height: 1.5; }
+.species-card-illustration { position: relative; width: 38px; height: 42px; flex: 0 0 38px; }
+.roster-compact .species-card-heading .roster-art, .species-reference .species-card-heading .roster-art { position: absolute; left: 50%; top: 50%; width: 110px; height: 100px; margin: 0; transform: translate(-50%, -50%) scale(.34); }
+.roster-compact .species-card-heading h2 { margin: 0 0 4px; font-size: clamp(17px, 1.6vw, 21px); }
+.species-reference .species-card-heading h2 { margin: 0 0 4px; font-size: 22px; }
+@media (max-width: 680px) { .roster-compact .species-card-heading { gap: 7px; } .roster-compact .species-card-illustration { width: 30px; flex-basis: 30px; } .roster-compact .species-card-heading .roster-art { transform: translate(-50%, -50%) scale(.28); } }

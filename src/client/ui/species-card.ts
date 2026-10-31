@@ -4,7 +4,7 @@ import { abilities } from '../../data/abilities/pond';
 export function createSpeciesCard(species: SpeciesDefinition, reference = false): HTMLElement {
   const card = document.createElement('article'); card.className = 'roster-card';
   card.style.setProperty('--species-color', `#${species.visual.membrane.toString(16).padStart(6, '0')}`);
-  card.innerHTML = `<div class="roster-art ${species.visual.shape}" aria-hidden="true"><span></span></div><h2>${species.name}</h2><i class="scientific-name">${species.scientificName}</i><p>${species.description}</p>`;
+  card.innerHTML = `<header class="species-card-heading"><div class="species-card-illustration" aria-hidden="true"><div class="roster-art ${species.visual.shape}"><span></span></div></div><div class="species-card-title"><h2>${species.name}</h2><i class="scientific-name">${species.scientificName}</i></div></header><p>${species.description}</p>`;
   if (reference) {
     card.id = species.id; card.setAttribute('aria-labelledby', `${species.id}-title`);
     card.querySelector('h2')!.id = `${species.id}-title`;
