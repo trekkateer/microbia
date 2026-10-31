@@ -279,5 +279,6 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 .species-reference .species-card-heading h2 { margin: 0 0 4px; font-size: 22px; }
 @media (max-width: 680px) { .roster-compact .species-card-heading { gap: 7px; } .roster-compact .species-card-illustration { width: 30px; flex-basis: 30px; } .roster-compact .species-card-heading .roster-art { transform: translate(-50%, -50%) scale(.28); } }
 .site-credit { display: flex; justify-content: center; align-items: center; min-height: 42px; padding: 10px 0; flex-shrink: 0; }
-.site-credit a { color: #526d60; font-size: 11px; text-decoration: none; text-underline-offset: 3px; }
+.site-credit span, .site-credit a {color: #526d60; font-size: 11px; }
+.site-credit a { text-decoration: none; text-underline-offset: 3px; }
 .site-credit a:hover { color: #173b38; text-decoration: underline; }

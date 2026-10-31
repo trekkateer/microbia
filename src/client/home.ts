@@ -30,7 +30,7 @@ async function start() {
 // Creates a footer with a link to my personal website
 function appendCredit(root: HTMLElement) {
   const footer = document.createElement('footer'); footer.className = 'site-credit';
-  const footerContent = document.createElement('span'); footerContent.innerText = 'Website build by ';
+  const footerContent = document.createElement('span'); footerContent.innerText = 'Website build by John Neumann • ';
   const link = document.createElement('a'); link.href = 'https://johncneumann.com'; link.textContent = 'johncneumann.com';
   footerContent.append(link); footer.append(footerContent); root.append(footer);
 }
