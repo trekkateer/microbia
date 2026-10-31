@@ -68,4 +68,3 @@ it('cleans up a join that never established a stream without creating a bot', ()
   room.leave('a', false);
   expect(room.world.organisms).toHaveLength(0); expect(room.clients.size).toBe(0);
 });
-
