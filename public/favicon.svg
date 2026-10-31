@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Microbia</title>
+  <rect width="64" height="64" rx="15" fill="#0B2729"/>
+  <g transform="translate(5 5) scale(.84)">
+    <path d="M39 6C47 3 56 9 54 18C63 24 61 36 54 40C56 51 44 60 35 54C26 63 13 57 12 47C1 44 1 30 9 24C4 13 16 4 25 9C28 2 35 2 39 6Z" fill="#B9D99C"/>
+    <path d="M28 23C34 19 42 24 42 31C42 39 35 43 29 39C23 36 22 28 28 23Z" fill="#163F3A"/>
+    <circle cx="30" cy="27" r="2.8" fill="#F2F1E9"/>
+  </g>
+</svg>
