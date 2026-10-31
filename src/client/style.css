@@ -255,12 +255,17 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 .species-jump-links { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0 24px; border-bottom: 1px solid #a4c7a426; }
 .species-jump-links a { padding: 7px 12px; border: 1px solid #a4c7a43d; border-radius: 20px; color: #c4d9b5; font-size: 12px; text-decoration: none; }
 .species-jump-links a:hover { background: #b5d1ab20; }
-.species-reference .roster-full { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 24px; }
-.species-reference .roster-card { scroll-margin-top: 20px; padding: 24px 28px; }
-.species-reference .roster-art { height: 75px; }
-.species-reference .roster-card p { min-height: 0; }
-.species-reference .roster-card dt { margin-top: 20px; }
+.species-reference .roster-full { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 18px; gap: 14px; align-items: start; }
+.species-reference .roster-card { scroll-margin-top: 20px; padding: 16px 18px; border-radius: 12px; }
+.species-reference .roster-art { height: 48px; transform: scale(.55); margin: -4px 0 0; }
+.species-reference .roster-card h2 { font-size: 24px; margin: 8px 0 4px; }
+.species-reference .scientific-name { font-size: 11px; }
+.species-reference .roster-card p, .species-reference .roster-card dd { font-size: 11px; line-height: 1.5; }
+.species-reference .roster-card p { min-height: 0; margin: 10px 0 0; }
+.species-reference .roster-card dl { margin: 0; }
+.species-reference .roster-card dt { margin: 12px 0 4px; font-size: 9px; letter-spacing: .5px; }
 .species-reference .roster-card:target { border-color: var(--species-color); }
 .index-play-link { color: #9bb8a9; padding: 24px 0 0; font-size: 13px; }
 .index-play-link a { color: #d6e7c9; text-underline-offset: 4px; }
-@media (max-width: 680px) { .species-reference { padding: 24px 16px; } .species-reference .roster-full { grid-template-columns: 1fr; } .species-reference .roster-card { padding: 22px; } }
+@media (min-width: 681px) and (max-width: 1000px) { .species-reference .roster-full { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .species-reference { padding: 24px 16px; } .species-reference .roster-full { grid-template-columns: 1fr; } .species-reference .roster-card { padding: 16px; } }
