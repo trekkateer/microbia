@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>Microbia cell mark</title>
+  <path d="M39 6C47 3 56 9 54 18C63 24 61 36 54 40C56 51 44 60 35 54C26 63 13 57 12 47C1 44 1 30 9 24C4 13 16 4 25 9C28 2 35 2 39 6Z" fill="#163F3A"/>
+  <path d="M38 13C45 9 51 14 48 21C57 25 55 34 48 36C51 44 42 52 35 47C28 55 19 51 19 43C10 43 8 33 16 28C11 20 18 12 25 17C28 10 34 9 38 13Z" fill="#B9D99C"/>
+  <path d="M28 23C34 19 42 24 42 31C42 39 35 43 29 39C23 36 22 28 28 23Z" fill="#163F3A"/>
+  <circle cx="30" cy="27" r="2.3" fill="#F2F1E9"/>
+  <circle cx="43" cy="19" r="2.2" fill="#5B8E6D"/>
+  <path d="M21 36C18 35 17 32 19 30" stroke="#5B8E6D" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

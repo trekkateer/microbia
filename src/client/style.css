@@ -21,9 +21,8 @@ button { font: inherit; cursor: pointer; }
 button:focus-visible, a:focus-visible { outline: 2px solid #e9c889; outline-offset: 4px; }
 #app { height: 100dvh; min-height: 570px; padding: 0 24px; display: flex; flex-direction: column; }
 .site-header { height: 82px; flex-shrink: 0; display: flex; align-items: center; gap: 32px; }
-.brand { display: flex; align-items: center; color: #163a35; text-decoration: none; font-size: 29px; font-weight: 750; letter-spacing: -1.7px; }
-.brand-cell { position: relative; width: 27px; height: 26px; margin-right: 11px; border: 1.5px solid #3b6150; background: #d9e3c8; border-radius: 43% 57% 66% 34% / 44% 33% 67% 56%; transform: rotate(-20deg); }
-.brand-cell::after { content: ''; width: 9px; height: 8px; position: absolute; left: 8px; top: 8px; border-radius: 50%; background: #6d8f74; }
+.brand { display: inline-flex; align-items: center; gap: 9px; color: #163f3a; text-decoration: none; font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+.brand-cell { display: block; flex: 0 0 40px; width: 40px; height: 40px; background: url('/brand/microbia-mark.svg') center / contain no-repeat; }
 .header-note { color: #7e8a7d; font-family: Georgia, serif; font-style: italic; font-size: 15px; margin-left: 7px; }
 .build-tag { margin-left: auto; display: flex; align-items: center; gap: 9px; font-size: 10px; letter-spacing: 1.5px; color: #617564; }
 .build-tag > span { width: 5px; height: 5px; background: #74945e; border-radius: 50%; }
@@ -282,3 +281,4 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 .site-credit span, .site-credit a {color: #526d60; font-size: 11px; }
 .site-credit a { text-decoration: none; text-underline-offset: 3px; }
 .site-credit a:hover { color: #173b38; text-decoration: underline; }
+@media (max-width: 680px) { .brand { gap: 7px; } .brand-cell { width: 34px; height: 34px; flex-basis: 34px; } .site-header { gap: 20px; } }
