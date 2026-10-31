@@ -9,19 +9,28 @@ async function start() {
   if (location.pathname === '/species' || location.pathname === '/species/') {
     document.title = 'Species index · microbia';
     renderSpeciesIndex(root, arenas['pond-water'], species);
+    appendCredit(root);
     return;
   }
   const room = roomFromSearch(location.search);
   let savedName = '';
   try { savedName = sessionStorage.getItem(NAME_STORAGE_KEY) ?? ''; } catch { /* Optional name remains blank. */ }
   document.title = 'microbia · Pond Water';
-  const organism = await chooseSpecies(root, arenas['pond-water'], species, room, savedName);
+  const choice = chooseSpecies(root, arenas['pond-water'], species, room, savedName);
+  appendCredit(root);
+  const organism = await choice;
   const name = root.querySelector<HTMLInputElement>('#player-name')!.value.trim();
   const selectedRoom = root.querySelector<HTMLInputElement>('#room-name')!.value;
   let href = playHref(selectedRoom);
   try { sessionStorage.setItem(SPECIES_STORAGE_KEY, organism.id); sessionStorage.setItem(NAME_STORAGE_KEY, name); }
   catch { href += '&' + new URLSearchParams({ species: organism.id, name }); }
   location.assign(href);
+}
+
+function appendCredit(root: HTMLElement) {
+  const footer = document.createElement('footer'); footer.className = 'site-credit';
+  const link = document.createElement('a'); link.href = 'https://johncneumann.com'; link.textContent = 'johncneumann.com';
+  footer.append(link); root.append(footer);
 }
 
 start().catch(error => {
