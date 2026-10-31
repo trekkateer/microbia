@@ -93,7 +93,7 @@ export async function connectPond(speciesId: string, room: string, name = '') {
       if (disconnected) listener(resignationReason); else listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    resign: () => lost('You resigned. Your run has ended.'),
+    resign: () => lost('You Disconected'),
     get status() {
       if (disconnected) return 'Resigned - connection ended';
       const age = performance.now() - lastStateAt;

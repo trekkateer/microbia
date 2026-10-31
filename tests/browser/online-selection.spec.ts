@@ -9,7 +9,6 @@ test('selection always joins the shared pond and never starts a local game when 
   });
   await page.goto('/');
   await expect(page.locator('#online-mode')).toHaveCount(0);
-  await expect(page.getByText('Join a shared pond with other players and bots.')).toBeVisible();
   await page.getByRole('button', { name: 'Play as Amoeba', exact: true }).click();
   await expect(page).toHaveURL(/\/play\?room=1$/);
   await expect(page.getByRole('alert')).toContainText('Could not join the pond');

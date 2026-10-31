@@ -17,3 +17,4 @@ export function showResignation(viewport: HTMLElement, room: string, reason: str
   restart.focus();
 }
 
+

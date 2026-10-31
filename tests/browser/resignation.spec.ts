@@ -20,3 +20,4 @@ test('resignation blocks the old HUD and offers a fresh run in the same room', a
   await expect(page.getByRole('button', { name: 'Respawn' })).toHaveCount(0);
 });
 
+
