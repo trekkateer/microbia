@@ -248,3 +248,19 @@ kbd { font: inherit; font-size: 9px; border-radius: 3px; background: #a3c1ac25; 
 @media (max-width: 1100px) { .roster-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 800px; } }
 @media (max-width: 680px) { .home-selection, .species-index { padding: 24px 16px 20px; } .selection-nav { gap: 14px; } .selection-nav a { font-size: 11px; } .join-settings { padding: 14px; margin-top: 20px; } .join-fields { grid-template-columns: 1fr; gap: 16px; } .join-field input { font-size: 16px; } .roster-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .roster-compact .roster-card { padding: 12px; } .roster-compact .roster-card h2 { font-size: 20px; } .selection-controls { line-height: 1.9; } }
 @media (max-width: 380px) { .roster-compact { grid-template-columns: 1fr; } }
+/* Field-guide layout: reading and comparison, separate from game setup. */
+.species-reference { text-align: left; padding: 36px 40px; }
+.index-heading, .species-jump-links, .species-reference .roster, .index-play-link { max-width: 1050px; margin-left: auto; margin-right: auto; }
+.index-heading .selection-intro { max-width: 640px; }
+.species-jump-links { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0 24px; border-bottom: 1px solid #a4c7a426; }
+.species-jump-links a { padding: 7px 12px; border: 1px solid #a4c7a43d; border-radius: 20px; color: #c4d9b5; font-size: 12px; text-decoration: none; }
+.species-jump-links a:hover { background: #b5d1ab20; }
+.species-reference .roster-full { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 24px; }
+.species-reference .roster-card { scroll-margin-top: 20px; padding: 24px 28px; }
+.species-reference .roster-art { height: 75px; }
+.species-reference .roster-card p { min-height: 0; }
+.species-reference .roster-card dt { margin-top: 20px; }
+.species-reference .roster-card:target { border-color: var(--species-color); }
+.index-play-link { color: #9bb8a9; padding: 24px 0 0; font-size: 13px; }
+.index-play-link a { color: #d6e7c9; text-underline-offset: 4px; }
+@media (max-width: 680px) { .species-reference { padding: 24px 16px; } .species-reference .roster-full { grid-template-columns: 1fr; } .species-reference .roster-card { padding: 22px; } }

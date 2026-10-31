@@ -1,16 +1,21 @@
 import { arenas, species } from '../data';
 import { chooseSpecies } from './ui/selection';
+import { renderSpeciesIndex } from './ui/species-index';
 import { playHref, roomFromSearch, SPECIES_STORAGE_KEY, NAME_STORAGE_KEY } from '../network/room-url';
 import './style.css';
 
 async function start() {
   const root = document.querySelector<HTMLElement>('#app')!;
+  if (location.pathname === '/species' || location.pathname === '/species/') {
+    document.title = 'Species index · microbia';
+    renderSpeciesIndex(root, arenas['pond-water'], species);
+    return;
+  }
   const room = roomFromSearch(location.search);
   let savedName = '';
   try { savedName = sessionStorage.getItem(NAME_STORAGE_KEY) ?? ''; } catch { /* Optional name remains blank. */ }
-  const detailed = location.pathname === '/species' || location.pathname === '/species/';
-  document.title = detailed ? 'Species index · microbia' : 'microbia · Pond Water';
-  const organism = await chooseSpecies(root, arenas['pond-water'], species, room, savedName, detailed);
+  document.title = 'microbia · Pond Water';
+  const organism = await chooseSpecies(root, arenas['pond-water'], species, room, savedName);
   const name = root.querySelector<HTMLInputElement>('#player-name')!.value.trim();
   const selectedRoom = root.querySelector<HTMLInputElement>('#room-name')!.value;
   let href = playHref(selectedRoom);

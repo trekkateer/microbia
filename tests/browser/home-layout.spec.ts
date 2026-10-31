@@ -23,13 +23,23 @@ test('homepage uses compact cards and styled, responsive join fields', async ({ 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('full species details live on the separate index and preserve room and name', async ({ page }) => {
+test('species index is a reference page without room, name or play controls', async ({ page }) => {
+  let lobbyRequests = 0;
+  await page.route('**/api/lobby', route => { lobbyRequests++; return route.fulfill({ json: [] }); });
   await page.goto('/?room=2');
   await page.getByRole('textbox', { name: 'Your name', exact: true }).fill('River');
   await page.getByRole('link', { name: 'Species index', exact: true }).click();
   await expect(page).toHaveURL(/\/species\?room=2$/);
   await expect(page.locator('.roster-full .roster-card dl')).toHaveCount(5);
-  await expect(page.getByLabel('Room', { exact: true })).toHaveValue('2');
+  await expect(page.getByRole('heading', { name: 'Species index', exact: true })).toBeVisible();
+  await expect(page.locator('form, input, .join-settings, .room-lobby')).toHaveCount(0);
+  await expect(page.locator('.roster-card button')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Browse species' }).getByRole('link')).toHaveCount(5);
+  const requestsBefore = lobbyRequests;
+  await page.reload();
+  await expect(page.locator('.roster-full .roster-card')).toHaveCount(5);
+  expect(lobbyRequests).toBe(requestsBefore);
+  await page.getByRole('link', { name: 'Choose an organism and play', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'Your name', exact: true })).toHaveValue('River');
 });
 
